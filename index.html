@@ -101,6 +101,17 @@
         }
         .lang-switch { display: flex; justify-content: flex-end; margin-bottom: 10px; }
         .lang-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: bold; }
+        .live-sum {
+            background: #f1f3f5;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .live-sum.valid { color: var(--success); }
+        .live-sum.invalid { color: var(--danger); background: #f8d7da; }
     </style>
 </head>
 <body>
@@ -150,6 +161,9 @@
         <h3 id="lblEnterResults" style="margin-top:20px;">Mata in resultat för runda 1</h3>
         <div id="inputsContainer"></div>
 
+        <!-- REALTIDSSUMMA -->
+        <div id="liveSumDisplay" class="live-sum">Rundans totala poängsumma: 0</div>
+
         <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
         
         <h3 id="lblHistory" style="margin-top:20px;">Historik</h3>
@@ -192,7 +206,10 @@
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
-                     <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`
+                     <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`,
+            sumText: "Rundans totala poängsumma: {sum} ({status})",
+            sumValid: "Giltig runda", sumInvalid: "Ogiltig! Måste vara jämnt delbar med 26 (t.ex. -26, 0, 26)",
+            validationAlert: "Felaktig poänginmatning! Summan av rundans poäng ({sum}) är inte jämnt delbar med 26. Kontrollera dina inställningar för hjärter, spader dam och 0 stick."
         },
         en: {
             langBtn: "Svenska", turn: "It is <strong>{name}</strong>'s turn to start!",
@@ -203,7 +220,10 @@
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the highest total score gets -8p, and the other two get -9p each.</p>
-                     <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly. Taking 26p twice in a row results in an instant loss.</p>`
+                     <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly. Taking 26p twice in a row results in an instant loss.</p>`,
+            sumText: "Round total score sum: {sum} ({status})",
+            sumValid: "Valid round", sumInvalid: "Invalid! Must be evenly divisible by 26 (e.g., -26, 0, 26)",
+            validationAlert: "Invalid score entry! The total round sum ({sum}) is not evenly divisible by 26. Please check your hearts, queen of spades and 0 trick toggles."
         }
     };
 
@@ -227,6 +247,7 @@
             document.getElementById("lblEnterResults").innerText = l.enterRes.replace("{r}", currentRound);
             renderInputs();
             renderTable();
+            calculateLiveSum();
         }
     }
 
@@ -299,7 +320,7 @@
                     <p class="player-name-title">${p.name}</p>
                     <div class="controls">
                         <span>${l.hearts}</span>
-                        <select id="hearts_${index}">${options}</select>
+                        <select id="hearts_${index}" onchange="calculateLiveSum()">${options}</select>
                         <button class="toggle-btn" id="queen_${index}" onclick="toggleQueen(${index})">${l.queen}</button>
                         <button class="toggle-btn" id="zero_${index}" onclick="toggleZero(${index})">${l.zero}</button>
                     </div>
@@ -310,28 +331,96 @@
 
     function toggleQueen(idx) {
         document.getElementById(`queen_${idx}`).classList.toggle("active");
+        calculateLiveSum();
     }
 
     function toggleZero(idx) {
         document.getElementById(`zero_${idx}`).classList.toggle("active");
         document.getElementById(`zero_${idx}`).classList.toggle("zero");
+        calculateLiveSum();
     }
 
-    function saveRound() {
+    // NY FUNKTION: Beräknar poängen i realtid och kollar om det är giltigt
+    function computeCurrentScores() {
         let roundScores = [0, 0, 0, 0];
         let zeroPlayers = [];
 
-        // 1. Samla in data från gränssnittet
         for(let i=0; i<4; i++) {
-            const hearts = parseInt(document.getElementById(`hearts_${i}`).value);
-            const hasQueen = document.getElementById(`queen_${i}`).classList.contains("active");
-            const isZero = document.getElementById(`zero_${i}`).classList.contains("active");
+            const hElem = document.getElementById(`hearts_${i}`);
+            const qElem = document.getElementById(`queen_${i}`);
+            const zElem = document.getElementById(`zero_${i}`);
+            
+            if(!hElem || !qElem || !zElem) return { scores: [0,0,0,0], sum: 0, isValid: true };
+
+            const hearts = parseInt(hElem.value);
+            const hasQueen = qElem.classList.contains("active");
+            const isZero = zElem.classList.contains("active");
 
             roundScores[i] = hearts + (hasQueen ? 13 : 0);
             if(isZero) zeroPlayers.push(i);
         }
 
-        // 2. Kontrollera om någon fick ALLA 26 poäng (regeln om 2 i rad)
+        // Specialregel för noll stick
+        if(zeroPlayers.length === 1) {
+            roundScores[zeroPlayers[0]] = -26;
+        } 
+        else if(zeroPlayers.length === 2) {
+            zeroPlayers.forEach(idx => roundScores[idx] = -13);
+        } 
+        else if(zeroPlayers.length === 3) {
+            let highestScore = -999;
+            let playerWithHighestScoreIdx = zeroPlayers[0];
+
+            zeroPlayers.forEach(idx => {
+                if(players[idx].score > highestScore) {
+                    highestScore = players[idx].score;
+                    playerWithHighestScoreIdx = idx;
+                }
+            });
+
+            zeroPlayers.forEach(idx => {
+                if(idx === playerWithHighestScoreIdx) {
+                    roundScores[idx] = -8;
+                } else {
+                    roundScores[idx] = -9;
+                }
+            });
+        }
+
+        const totalSum = roundScores.reduce((a, b) => a + b, 0);
+        // Kontroll: Är summan jämnt delbar med 26? (totalSum % 26 === 0)
+        const isValid = (totalSum % 26 === 0);
+
+        return { scores: roundScores, sum: totalSum, isValid: isValid };
+    }
+
+    function calculateLiveSum() {
+        const result = computeCurrentScores();
+        const display = document.getElementById("liveSumDisplay");
+        const l = isSwedish ? texts.sv : texts.en;
+
+        if(result.isValid) {
+            display.className = "live-sum valid";
+            display.innerHTML = l.sumText.replace("{sum}", result.sum).replace("{status}", l.sumValid);
+        } else {
+            display.className = "live-sum invalid";
+            display.innerHTML = l.sumText.replace("{sum}", result.sum).replace("{status}", l.sumInvalid);
+        }
+    }
+
+    function saveRound() {
+        const result = computeCurrentScores();
+        const l = isSwedish ? texts.sv : texts.en;
+
+        // VALIDERING: Stoppa sparandet om summan inte är jämnt delbar med 26
+        if(!result.isValid) {
+            alert(l.validationAlert.replace("{sum}", result.sum));
+            return;
+        }
+
+        let roundScores = result.scores;
+
+        // Kontrollera om någon fick ALLA 26 poäng (regeln om 2 i rad)
         for(let i=0; i<4; i++) {
             if(roundScores[i] === 26) {
                 players[i].consecutiveAll++;
@@ -347,41 +436,12 @@
             }
         }
 
-        // 3. Specialregel för noll stick (Utan decimaler)
-        if(zeroPlayers.length === 1) {
-            roundScores[zeroPlayers[0]] = -26;
-        } 
-        else if(zeroPlayers.length === 2) {
-            zeroPlayers.forEach(idx => roundScores[idx] = -13);
-        } 
-        else if(zeroPlayers.length === 3) {
-            // Hitta vem av de tre som har högst totalpoäng JUST NU i matchen
-            let highestScore = -999;
-            let playerWithHighestScoreIdx = zeroPlayers[0];
-
-            zeroPlayers.forEach(idx => {
-                if(players[idx].score > highestScore) {
-                    highestScore = players[idx].score;
-                    playerWithHighestScoreIdx = idx;
-                }
-            });
-
-            // Tilldela poäng: Högst poäng får -8, de andra två får -9
-            zeroPlayers.forEach(idx => {
-                if(idx === playerWithHighestScoreIdx) {
-                    roundScores[idx] = -8;
-                } else {
-                    roundScores[idx] = -9;
-                }
-            });
-        }
-
-        // 4. Uppdatera spelarnas totalpoäng
+        // Uppdatera spelarnas totalpoäng
         for(let i=0; i<4; i++) {
             players[i].score += roundScores[i];
         }
 
-        // 5. Lägg till i historik-tabellen
+        // Lägg till i historik-tabellen
         const hBody = document.getElementById("historyBody");
         let rowHtml = `<tr><td><strong>R${currentRound}</strong></td>`;
         roundScores.forEach(s => {
@@ -390,7 +450,7 @@
         rowHtml += `</tr>`;
         hBody.innerHTML = rowHtml + hBody.innerHTML;
 
-        // 6. Kontrollera om spelet är slut
+        // Kontrollera om spelet är slut
         let gameOver = false;
         let msg = "";
 
@@ -411,16 +471,16 @@
             return;
         }
 
-        // 7. Förbered nästa runda
+        // Förbered nästa runda
         currentRound++;
         startingPlayerIndex = (startingPlayerIndex + 1) % 4;
         
-        const l = isSwedish ? texts.sv : texts.en;
         document.getElementById("lblEnterResults").innerText = l.enterRes.replace("{r}", currentRound);
         
         updateTurnIndicator();
         renderTable();
         renderInputs();
+        calculateLiveSum();
     }
 
     function endGame() {
