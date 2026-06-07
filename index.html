@@ -168,7 +168,7 @@
             </tbody>
         </table>
 
-        <!-- Inmatningsformulär (Döljs när spelet är klart) -->
+        <!-- Inmatningsformulär -->
         <div id="inputArea">
             <h3 id="lblEnterResults" style="margin-top:20px;">Mata in resultat för runda 1</h3>
             <div id="inputsContainer"></div>
@@ -177,7 +177,7 @@
             <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
         </div>
         
-        <!-- Knapp som visas när spelet är slut för att stänga/analysera klart -->
+        <!-- Knapp som visas när spelet är slut -->
         <button class="btn btn-success hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
         
         <h3 id="lblHistory" style="margin-top:20px;">Historik</h3>
@@ -222,8 +222,8 @@
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
-            sumValid: "Giltig runda", sumInvalid: "Ogiltig! Måste finnas minst +26 poäng och summan vara delbar med 26.",
-            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng i grunden att fördela innan eventuella minuspoäng dras av. Just nu blir totalsumman {sum}."
+            sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, och summan delbar med 26.",
+            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng (värdekort) att fördela per runda innan eventuella minuspoäng dras av."
         },
         en: {
             langBtn: "Svenska", turn: "It is <strong>{name}</strong>'s turn to start!",
@@ -235,8 +235,8 @@
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the highest total score gets -8p, and the other two get -9p each.</p>
                      <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly. Taking 26p twice in a row results in an instant loss.</p>`,
             sumText: "Round total score sum: {sum} ({status})",
-            sumValid: "Valid round", sumInvalid: "Invalid! There must be at least +26 points and the sum must be divisible by 26.",
-            validationAlert: "Invalid score entry! There must be exactly 26 positive points distributed before any negative points are applied. Right now the total sum is {sum}."
+            sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, and total sum divisible by 26.",
+            validationAlert: "Invalid score entry! There must be exactly 26 positive points (value cards) distributed per round before any negative points are applied."
         }
     };
 
@@ -324,7 +324,7 @@
             body.innerHTML += `<td style="font-size:20px; font-weight:bold; color:${p.score >= 52 ? 'var(--danger)' : 'inherit'}">${p.score}</td>`;
             histHead.innerHTML += `<th>${p.name}</th>`;
         });
-        histHead.innerHTML += `<th></th>`; // Tom kolumn för papperskorgen
+        histHead.innerHTML += `<th></th>`;
     }
 
     function renderInputs() {
@@ -351,14 +351,14 @@
             
             let val = parseInt(inputElem.value) || 0;
             roundScores[i] = val;
-            if (val > 0) positiveSum += val; // Räkna bara pluspoäng
+            if (val > 0) positiveSum += val;
         }
 
         const totalSum = roundScores.reduce((a, b) => a + b, 0);
         
-        // Regel 1-kontroll: Det måste finnas åtminstone 26 pluspoäng inmatade totalt,
-        // och totalsumman (plus och minus) måste vara jämnt delbar med 26.
-        const isValid = (positiveSum >= 26 && totalSum % 26 === 0);
+        // RÄTTNING 1: Pluspoängen måste vara EXAKT 26 (kan inte ha fler eller färre), 
+        // och totalsumman måste fortfarande vara jämnt delbar med 26.
+        const isValid = (positiveSum === 26 && totalSum % 26 === 0);
 
         return { scores: roundScores, sum: totalSum, isValid: isValid };
     }
@@ -383,7 +383,7 @@
         const l = isSwedish ? texts.sv : texts.en;
 
         if(!result.isValid) {
-            alert(l.validationAlert.replace("{sum}", result.sum));
+            alert(l.validationAlert);
             return;
         }
 
@@ -409,10 +409,10 @@
             players[i].score += roundScores[i];
         }
 
-        // Spara rundan i datastrukturen
+        // Spara rundan
         rounds.push({ roundNumber: currentRound, scores: [...roundScores] });
 
-        // Kontrollera vanliga slutvillkor
+        // Kontrollera slutvillkor
         let shouldEnd = false;
         let endMsg = "";
 
@@ -445,12 +445,10 @@
         renderHistory();
     }
 
-    // Regel 2: Rita ut historik och hantera papperskorg för senaste runda
     function renderHistory() {
         const hBody = document.getElementById("historyBody");
         hBody.innerHTML = "";
 
-        // Rita ut baklänges (nyast överst)
         for (let i = rounds.length - 1; i >= 0; i--) {
             const r = rounds[i];
             let rowHtml = `<tr><td><strong>R${r.roundNumber}</strong></td>`;
@@ -458,8 +456,8 @@
                 rowHtml += `<td>${s > 0 ? '+' : ''}${s}</td>`;
             });
             
-            // Visa bara papperskorgen på den absolut senaste rundan, och bara om spelet inte är slut
-            if (i === rounds.length - 1 && !isGameOver) {
+            // RÄTTNING 2: Papperskorgen visas ALLTID på senaste rundan, även om isGameOver är sant!
+            if (i === rounds.length - 1) {
                 rowHtml += `<td><button class="delete-btn" onclick="deleteLastRound()" title="Ångra runda">🗑️</button></td>`;
             } else {
                 rowHtml += `<td></td>`;
@@ -471,25 +469,33 @@
     }
 
     function deleteLastRound() {
-        if (rounds.length === 0 || isGameOver) return;
+        if (rounds.length === 0) return;
         
         if (confirm(isSwedish ? "Vill du verkligen ta bort och ångra senaste rundan?" : "Are you sure you want to delete and undo the last round?")) {
             const removedRound = rounds.pop();
             
-            // Dra av poängen från spelarna
+            // Dra av poängen
             for (let i = 0; i < 4; i++) {
                 players[i].score -= removedRound.scores[i];
-                // Om de hade 26p, nolla deras svit-räknare temporärt (enkel approximation)
                 if (removedRound.scores[i] === 26 && players[i].consecutiveAll > 0) {
                     players[i].consecutiveAll--;
                 }
             }
 
-            // Hoppa tillbaka runda och startspelare
+            // Återställ runda och startspelare
             currentRound--;
             startingPlayerIndex = (startingPlayerIndex - 1 + 4) % 4;
 
-            // Uppdatera allt
+            // RÄTTNING 2-LOGIK: Om spelet var slut, lås upp gränssnittet igen!
+            if (isGameOver) {
+                isGameOver = false;
+                document.getElementById("inputArea").classList.remove("hidden");
+                document.getElementById("turnIndicator").classList.remove("hidden");
+                document.getElementById("gameOverBanner").classList.add("hidden");
+                document.getElementById("btnNewGameAfterEnd").classList.add("hidden");
+            }
+
+            // Uppdatera allt på skärmen
             const l = isSwedish ? texts.sv : texts.en;
             document.getElementById("lblEnterResults").innerText = l.enterRes.replace("{r}", currentRound);
             updateTurnIndicator();
@@ -500,21 +506,17 @@
         }
     }
 
-    // Regel 3: Hantera spelslut utan att rensa skärmen
     function triggerGameOver(msg) {
         isGameOver = true;
         
-        // Dölj inmatningsområdet och vanliga turindikatorn
         document.getElementById("inputArea").classList.add("hidden");
         document.getElementById("turnIndicator").classList.add("hidden");
         
-        // Visa spelslut-banderollen med resultatet samt nya starta-om knappen
         const banner = document.getElementById("gameOverBanner");
         banner.innerText = msg;
         banner.classList.remove("hidden");
         document.getElementById("btnNewGameAfterEnd").classList.remove("hidden");
         
-        // Uppdatera tabeller så sista poängen syns
         renderTable();
         renderHistory();
     }
