@@ -46,7 +46,7 @@
         .btn-success { background: var(--success); }
         .form-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"] {
+        input[type="text"], input[type="number"] {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
@@ -64,30 +64,20 @@
         }
         .player-row {
             background: var(--light);
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-left: 5px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .player-name-title { font-size: 18px; margin: 0 0 10px 0; color: var(--primary); }
-        .controls { display: flex; gap: 10px; align-items: center; }
-        select { padding: 8px; border-radius: 6px; font-size: 14px; }
-        .toggle-btn {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toggle-btn.active {
-            background: #6f42c1;
-            color: white;
-            border-color: #6f42c1;
-        }
-        .toggle-btn.active.zero {
-            background: var(--success);
-            border-color: var(--success);
+        .player-name-title { font-size: 18px; margin: 0; font-weight: bold; color: var(--primary); }
+        .score-input {
+            width: 80px;
+            font-size: 16px;
+            text-align: center;
+            padding: 8px;
         }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 8px; text-align: center; border-bottom: 1px solid #ddd; }
@@ -107,7 +97,7 @@
             border-radius: 6px;
             text-align: center;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 14px;
         }
         .live-sum.valid { color: var(--success); }
@@ -201,29 +191,27 @@
             langBtn: "English", turn: "Det är <strong>{name}</strong>s tur att börja!",
             standings: "Nuvarande Ställning", enterRes: "Mata in resultat för runda {r}",
             save: "Spara runda", history: "Historik", end: "Avbryt spel", start: "Starta Spelet",
-            hearts: "Hjärter:", queen: "♠️ Dam", zero: "0 stick", round: "Runda",
-            rulesT: "Regler för Maja",
+            round: "Runda", rulesT: "Regler för Maja",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Måste vara jämnt delbar med 26 (t.ex. -26, 0, 26)",
-            validationAlert: "Felaktig poänginmatning! Summan av rundans poäng ({sum}) är inte jämnt delbar med 26. Kontrollera dina inställningar för hjärter, spader dam och 0 stick."
+            validationAlert: "Felaktig poänginmatning! Summan av rundans poäng ({sum}) är inte jämnt delbar med 26. Kontrollera att du knappat in rätt poäng för alla spelare."
         },
         en: {
             langBtn: "Svenska", turn: "It is <strong>{name}</strong>'s turn to start!",
             standings: "Current Standings", enterRes: "Enter results for round {r}",
             save: "Save round", history: "History", end: "End Game", start: "Start Game",
-            hearts: "Hearts:", queen: "♠️ Queen", zero: "0 tricks", round: "Round",
-            rulesT: "Maja Rules",
+            round: "Round", rulesT: "Maja Rules",
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the highest total score gets -8p, and the other two get -9p each.</p>
                      <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly. Taking 26p twice in a row results in an instant loss.</p>`,
             sumText: "Round total score sum: {sum} ({status})",
             sumValid: "Valid round", sumInvalid: "Invalid! Must be evenly divisible by 26 (e.g., -26, 0, 26)",
-            validationAlert: "Invalid score entry! The total round sum ({sum}) is not evenly divisible by 26. Please check your hearts, queen of spades and 0 trick toggles."
+            validationAlert: "Invalid score entry! The total round sum ({sum}) is not evenly divisible by 26. Please check the entered points for all players."
         }
     };
 
@@ -309,86 +297,29 @@
     function renderInputs() {
         const container = document.getElementById("inputsContainer");
         container.innerHTML = "";
-        const l = isSwedish ? texts.sv : texts.en;
 
         players.forEach((p, index) => {
-            let options = "";
-            for(let i=0; i<=13; i++) options += `<option value="${i}">${i}</option>`;
-
             container.innerHTML += `
                 <div class="player-row">
                     <p class="player-name-title">${p.name}</p>
-                    <div class="controls">
-                        <span>${l.hearts}</span>
-                        <select id="hearts_${index}" onchange="calculateLiveSum()">${options}</select>
-                        <button class="toggle-btn" id="queen_${index}" onclick="toggleQueen(${index})">${l.queen}</button>
-                        <button class="toggle-btn" id="zero_${index}" onclick="toggleZero(${index})">${l.zero}</button>
-                    </div>
+                    <input type="number" id="score_input_${index}" class="score-input" value="0" oninput="calculateLiveSum()">
                 </div>
             `;
         });
     }
 
-    function toggleQueen(idx) {
-        document.getElementById(`queen_${idx}`).classList.toggle("active");
-        calculateLiveSum();
-    }
-
-    function toggleZero(idx) {
-        document.getElementById(`zero_${idx}`).classList.toggle("active");
-        document.getElementById(`zero_${idx}`).classList.toggle("zero");
-        calculateLiveSum();
-    }
-
-    // NY FUNKTION: Beräknar poängen i realtid och kollar om det är giltigt
     function computeCurrentScores() {
         let roundScores = [0, 0, 0, 0];
-        let zeroPlayers = [];
 
         for(let i=0; i<4; i++) {
-            const hElem = document.getElementById(`hearts_${i}`);
-            const qElem = document.getElementById(`queen_${i}`);
-            const zElem = document.getElementById(`zero_${i}`);
+            const inputElem = document.getElementById(`score_input_${i}`);
+            if(!inputElem) return { scores: [0,0,0,0], sum: 0, isValid: true };
             
-            if(!hElem || !qElem || !zElem) return { scores: [0,0,0,0], sum: 0, isValid: true };
-
-            const hearts = parseInt(hElem.value);
-            const hasQueen = qElem.classList.contains("active");
-            const isZero = zElem.classList.contains("active");
-
-            roundScores[i] = hearts + (hasQueen ? 13 : 0);
-            if(isZero) zeroPlayers.push(i);
-        }
-
-        // Specialregel för noll stick
-        if(zeroPlayers.length === 1) {
-            roundScores[zeroPlayers[0]] = -26;
-        } 
-        else if(zeroPlayers.length === 2) {
-            zeroPlayers.forEach(idx => roundScores[idx] = -13);
-        } 
-        else if(zeroPlayers.length === 3) {
-            let highestScore = -999;
-            let playerWithHighestScoreIdx = zeroPlayers[0];
-
-            zeroPlayers.forEach(idx => {
-                if(players[idx].score > highestScore) {
-                    highestScore = players[idx].score;
-                    playerWithHighestScoreIdx = idx;
-                }
-            });
-
-            zeroPlayers.forEach(idx => {
-                if(idx === playerWithHighestScoreIdx) {
-                    roundScores[idx] = -8;
-                } else {
-                    roundScores[idx] = -9;
-                }
-            });
+            // Om fältet är tomt räknar vi det som 0 poäng
+            roundScores[i] = parseInt(inputElem.value) || 0;
         }
 
         const totalSum = roundScores.reduce((a, b) => a + b, 0);
-        // Kontroll: Är summan jämnt delbar med 26? (totalSum % 26 === 0)
         const isValid = (totalSum % 26 === 0);
 
         return { scores: roundScores, sum: totalSum, isValid: isValid };
@@ -412,7 +343,6 @@
         const result = computeCurrentScores();
         const l = isSwedish ? texts.sv : texts.en;
 
-        // VALIDERING: Stoppa sparandet om summan inte är jämnt delbar med 26
         if(!result.isValid) {
             alert(l.validationAlert.replace("{sum}", result.sum));
             return;
@@ -450,7 +380,7 @@
         rowHtml += `</tr>`;
         hBody.innerHTML = rowHtml + hBody.innerHTML;
 
-        // Kontrollera om spelet är slut
+        // Kontrollera slutvillkor
         let gameOver = false;
         let msg = "";
 
