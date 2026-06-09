@@ -124,7 +124,7 @@
         .flag-btn {
             background: none;
             border: 2px solid transparent;
-            font-size: 24px;
+            font-size: 28px; /* Lite större för bättre synlighet */
             cursor: pointer;
             padding: 2px;
             border-radius: 4px;
@@ -166,19 +166,19 @@
     <div id="setupScreen">
         <div class="form-group">
             <label id="lblP1">Spelare 1</label>
-            <input type="text" id="p1" value="Spelare 1">
+            <input type="text" id="p1" value="" placeholder="Spelare 1">
         </div>
         <div class="form-group">
             <label id="lblP2">Spelare 2</label>
-            <input type="text" id="p2" value="Spelare 2">
+            <input type="text" id="p2" value="" placeholder="Spelare 2">
         </div>
         <div class="form-group">
             <label id="lblP3">Spelare 3</label>
-            <input type="text" id="p3" value="Spelare 3">
+            <input type="text" id="p3" value="" placeholder="Spelare 3">
         </div>
         <div class="form-group">
             <label id="lblP4">Spelare 4</label>
-            <input type="text" id="p4" value="Spelare 4">
+            <input type="text" id="p4" value="" placeholder="Spelare 4">
         </div>
         <button class="btn btn-success" onclick="startGame()" id="btnStart">Starta Spelet</button>
     </div>
@@ -206,7 +206,7 @@
             <div id="liveSumDisplay" class="live-sum">Rundans totala poängsumma: 0</div>
             <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
             
-            <!-- NY PLACERING: Turordning ligger nu UNDER knappen -->
+            <!-- Turordning ligger under knappen -->
             <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
         </div>
         
@@ -242,10 +242,11 @@
     let currentLang = 'sv';
     let isGameOver = false;
 
-    if(localStorage.getItem("maja_p1")) document.getElementById("p1").value = localStorage.getItem("maja_p1");
-    if(localStorage.getItem("maja_p2")) document.getElementById("p2").value = localStorage.getItem("maja_p2");
-    if(localStorage.getItem("maja_p3")) document.getElementById("p3").value = localStorage.getItem("maja_p3");
-    if(localStorage.getItem("maja_p4")) document.getElementById("p4").value = localStorage.getItem("maja_p4");
+    // Ladda sparade namn som placeholders (ledtext) istället för fasta värden
+    if(localStorage.getItem("maja_p1")) document.getElementById("p1").placeholder = localStorage.getItem("maja_p1");
+    if(localStorage.getItem("maja_p2")) document.getElementById("p2").placeholder = localStorage.getItem("maja_p2");
+    if(localStorage.getItem("maja_p3")) document.getElementById("p3").placeholder = localStorage.getItem("maja_p3");
+    if(localStorage.getItem("maja_p4")) document.getElementById("p4").placeholder = localStorage.getItem("maja_p4");
 
     const texts = {
         sv: {
@@ -255,7 +256,7 @@
             round: "Runda", rulesT: "Regler för Maja", newGame: "Starta nytt spel",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
-                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
+                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, and de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, och summan delbar med 26.",
@@ -298,7 +299,6 @@
     function setLanguage(lang) {
         currentLang = lang;
         
-        // Uppdatera aktiv flaggknapp i CSS
         document.getElementById("btnLangSv").classList.remove("active");
         document.getElementById("btnLangEn").classList.remove("active");
         document.getElementById("btnLangDe").classList.remove("active");
@@ -329,7 +329,6 @@
         if (players.length > 0) {
             if (!isGameOver) updateTurnIndicator();
             document.getElementById("lblEnterResults").innerText = l.enterRes.replace("{r}", currentRound);
-            if (!isGameOver) renderInputs();
             renderTable();
             calculateLiveSum();
             renderHistory();
@@ -337,10 +336,11 @@
     }
 
     function startGame() {
-        const p1n = document.getElementById("p1").value || "Spelare 1";
-        const p2n = document.getElementById("p2").value || "Spelare 2";
-        const p3n = document.getElementById("p3").value || "Spelare 3";
-        const p4n = document.getElementById("p4").value || "Spelare 4";
+        // Om rutan lämnats tom tas värdet från dess placeholder (ledtext)
+        const p1n = document.getElementById("p1").value || document.getElementById("p1").placeholder || "Spelare 1";
+        const p2n = document.getElementById("p2").value || document.getElementById("p2").placeholder || "Spelare 2";
+        const p3n = document.getElementById("p3").value || document.getElementById("p3").placeholder || "Spelare 3";
+        const p4n = document.getElementById("p4").value || document.getElementById("p4").placeholder || "Spelare 4";
 
         localStorage.setItem("maja_p1", p1n);
         localStorage.setItem("maja_p2", p2n);
@@ -368,6 +368,7 @@
         document.getElementById("historyBody").innerHTML = "";
         
         updateLanguageDOM();
+        renderInputs(); // Skapar helt tomma poängfält vid start
     }
 
     function updateTurnIndicator() {
@@ -397,13 +398,15 @@
         container.innerHTML = "";
 
         players.forEach((p, index) => {
+            // value="" och placeholder="0" gör att rutorna startar helt tomma men räknas som 0
             container.innerHTML += `
                 <div class="player-row">
                     <p class="player-name-title">${p.name}</p>
-                    <input type="number" id="score_input_${index}" class="score-input" value="0" oninput="calculateLiveSum()">
+                    <input type="number" id="score_input_${index}" class="score-input" value="" placeholder="0" oninput="calculateLiveSum()">
                 </div>
             `;
         });
+        calculateLiveSum();
     }
 
     function computeCurrentScores() {
@@ -414,7 +417,10 @@
             const inputElem = document.getElementById(`score_input_${i}`);
             if(!inputElem) return { scores: [0,0,0,0], sum: 0, isValid: true };
             
-            let val = parseInt(inputElem.value) || 0;
+            // Tolka tomt fält som 0
+            let val = parseInt(inputElem.value);
+            if (isNaN(val)) val = 0; 
+            
             roundScores[i] = val;
             if (val > 0) positiveSum += val;
         }
@@ -497,8 +503,7 @@
         
         updateTurnIndicator();
         renderTable();
-        renderInputs();
-        calculateLiveSum();
+        renderInputs(); // Rensar fälten helt inför nästa runda
         renderHistory();
     }
 
@@ -553,14 +558,12 @@
             updateTurnIndicator();
             renderTable();
             renderInputs();
-            calculateLiveSum();
             renderHistory();
         }
     }
 
     function triggerGameOver(msg) {
         isGameOver = true;
-        
         document.getElementById("inputArea").classList.add("hidden");
         
         const banner = document.getElementById("gameOverBanner");
@@ -575,6 +578,19 @@
     function endGame() {
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
+        
+        // Återställ rutorna inför nästa gång de ska skriva in namn
+        if (players.length > 0) {
+            document.getElementById("p1").placeholder = players[0].name;
+            document.getElementById("p2").placeholder = players[1].name;
+            document.getElementById("p3").placeholder = players[2].name;
+            document.getElementById("p4").placeholder = players[3].name;
+        }
+        document.getElementById("p1").value = "";
+        document.getElementById("p2").value = "";
+        document.getElementById("p3").value = "";
+        document.getElementById("p4").value = "";
+        
         players = [];
         isGameOver = false;
     }
