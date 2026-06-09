@@ -138,7 +138,6 @@
             border-color: var(--primary);
             background: #e9ecef;
         }
-        /* Gör så att Twemojis flaggbilder blir lagom stora */
         .flag-btn img.emoji {
             width: 28px;
             height: 28px;
@@ -154,6 +153,17 @@
         }
         .live-sum.valid { color: var(--success); }
         .live-sum.invalid { color: var(--danger); background: #f8d7da; }
+        
+        /* STIL FÖR DEDIKATIONEN I BOTTEN */
+        .app-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+            font-size: 13px;
+            color: #6c757d;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -241,9 +251,14 @@
         <h3 id="rulesTitle">Regler för Maja</h3>
         <div id="rulesContent"></div>
     </div>
+
+    <!-- TILLÄGNAN TILL GÖRAN BERN -->
+    <div class="app-footer" id="appFooter">
+        Tillägnad Göran Bern som lärde oss alla att spela Maja.
+    </div>
 </div>
 
-<script>
+<script {text/javascript}>
     let players = [];
     let rounds = [];
     let currentRound = 1;
@@ -270,7 +285,8 @@
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, och summan delbar med 26.",
             validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng (värdekort) att fördela per runda innan eventuella minuspoäng dras av.",
             confirmDelete: "Vill du verkligen ta bort och ångra senaste rundan?",
-            p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4"
+            p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4",
+            footerText: "Tillägnad Göran Bern som lärde oss alla att spela Maja. ❤️"
         },
         en: {
             rulesLink: "Rules", turn: "It is <strong>{name}</strong>'s turn to start!",
@@ -285,7 +301,8 @@
             sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, and total sum divisible by 26.",
             validationAlert: "Invalid score entry! There must be exactly 26 positive points (value cards) distributed per round before any negative points are applied.",
             confirmDelete: "Are you sure you want to delete and undo the last round?",
-            p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4"
+            p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4",
+            footerText: "Dedicated to Göran Bern, who originally taught us all how to play Maja. ❤️"
         },
         de: {
             rulesLink: "Regeln", turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
@@ -300,7 +317,8 @@
             sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein und die Summe durch 26 teilbar sein.",
             validationAlert: "Ungültige Punkteingabe! Es müssen genau 26 Pluspunkte (Wertkarten) pro Runde verteilt werden, bevor Minuspunkte verrechnet werden.",
             confirmDelete: "Möchten Sie die letzte Runde wirklich löschen und rückgängig machen?",
-            p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4"
+            p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4",
+            footerText: "Gewidmet Göran Bern, der uns allen das Maja-Spielen beigebracht hat. ❤️"
         }
     };
 
@@ -333,6 +351,7 @@
         document.getElementById("lblP2").innerText = l.p2Label;
         document.getElementById("lblP3").innerText = l.p3Label;
         document.getElementById("lblP4").innerText = l.p4Label;
+        document.getElementById("appFooter").innerText = l.footerText; // Här ändras texten i botten
         
         if (players.length > 0) {
             if (!isGameOver) updateTurnIndicator();
@@ -341,7 +360,6 @@
             calculateLiveSum();
             renderHistory();
         }
-        // Kör Twemoji på containern för att rita om flagg-bilderna vid språkbyte
         twemoji.parse(document.getElementById("mainContainer"));
     }
 
@@ -407,7 +425,6 @@
         container.innerHTML = "";
 
         players.forEach((p, index) => {
-            // RÄTTNING 2: value="" och INGEN placeholder="0" gör att rutorna blir absolut helt tomma
             container.innerHTML += `
                 <div class="player-row">
                     <p class="player-name-title">${p.name}</p>
@@ -602,7 +619,6 @@
         isGameOver = false;
     }
 
-    // Kör Twemoji första gången sidan laddas in för att fixa flaggorna direkt
     window.onload = function() {
         updateLanguageDOM();
     };
