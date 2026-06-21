@@ -65,15 +65,22 @@
             border: 1px solid #b3e5fc;
         }
         .game-over-banner {
-            background: #f8d7da;
-            color: var(--danger);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
             font-size: 18px;
             margin-bottom: 15px;
+        }
+        .game-over-banner.lose {
+            background: #f8d7da;
+            color: var(--danger);
             border: 2px solid var(--danger);
+        }
+        .game-over-banner.win {
+            background: #d4edda;
+            color: var(--success);
+            border: 2px solid var(--success);
         }
         .player-row {
             background: var(--light);
@@ -154,7 +161,6 @@
         .live-sum.valid { color: var(--success); }
         .live-sum.invalid { color: var(--danger); background: #f8d7da; }
         
-        /* STIL FÖR DEDIKATIONEN I BOTTEN */
         .app-footer {
             text-align: center;
             margin-top: 25px;
@@ -258,7 +264,7 @@
     </div>
 </div>
 
-<script {text/javascript}>
+<script>
     let players = [];
     let rounds = [];
     let currentRound = 1;
@@ -280,10 +286,10 @@
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
-                     <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt). Tar man 26p två gånger i rad förlorar man direkt.</p>`,
+                     <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt).</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
-            sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, och summan delbar med 26.",
-            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng (värdekort) att fördela per runda innan eventuella minuspoäng dras av.",
+            sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, summan delbar med 26 och minst en spelare måste ha ≥ 13 poäng.",
+            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng totalt, summan måste vara delbar med 26 och minst en person måste ha fått minst 13 poäng.",
             confirmDelete: "Vill du verkligen ta bort och ångra senaste rundan?",
             p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4",
             footerText: "Tillägnad Göran Bern som lärde oss alla att spela Maja. ❤️"
@@ -296,10 +302,10 @@
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the highest total score gets -8p, and the other two get -9p each.</p>
-                     <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly. Taking 26p twice in a row results in an instant loss.</p>`,
+                     <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly.</p>`,
             sumText: "Round total score sum: {sum} ({status})",
-            sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, and total sum divisible by 26.",
-            validationAlert: "Invalid score entry! There must be exactly 26 positive points (value cards) distributed per round before any negative points are applied.",
+            sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, total sum divisible by 26, and at least one player must have ≥ 13 points.",
+            validationAlert: "Invalid score entry! Positive points must total exactly 26, sum must be divisible by 26, and at least one person must have at least 13 points.",
             confirmDelete: "Are you sure you want to delete and undo the last round?",
             p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4",
             footerText: "Dedicated to Göran Bern, who originally taught us all how to play Maja. ❤️"
@@ -308,14 +314,14 @@
             rulesLink: "Regeln", turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", end: "Spiel beenden", start: "Spiel starten",
-            round: "Runde", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
+            round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
             rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der höchsten Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
-                     <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort. Wer zweimal hintereinander alle 26P holt, verliert sofort.</p>`,
+                     <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
             sumText: "Gesamtpunktzahl der Runde: {sum} ({status})",
-            sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein und die Summe durch 26 teilbar sein.",
-            validationAlert: "Ungültige Punkteingabe! Es müssen genau 26 Pluspunkte (Wertkarten) pro Runde verteilt werden, bevor Minuspunkte verrechnet werden.",
+            sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein, die Summe durch 26 teilbar sein und mindestens ein Spieler muss ≥ 13 Punkte haben.",
+            validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein, die Summe durch 26 teilbar sein und mindestens eine Person muss mindestens 13 Punkte haben.",
             confirmDelete: "Möchten Sie die letzte Runde wirklich löschen und rückgängig machen?",
             p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4",
             footerText: "Gewidmet Göran Bern, der uns allen das Maja-Spielen beigebracht hat. ❤️"
@@ -351,7 +357,7 @@
         document.getElementById("lblP2").innerText = l.p2Label;
         document.getElementById("lblP3").innerText = l.p3Label;
         document.getElementById("lblP4").innerText = l.p4Label;
-        document.getElementById("appFooter").innerText = l.footerText; // Här ändras texten i botten
+        document.getElementById("appFooter").innerText = l.footerText;
         
         if (players.length > 0) {
             if (!isGameOver) updateTurnIndicator();
@@ -375,10 +381,10 @@
         localStorage.setItem("maja_p4", p4n);
 
         players = [
-            { name: p1n, score: 0, consecutiveAll: 0 },
-            { name: p2n, score: 0, consecutiveAll: 0 },
-            { name: p3n, score: 0, consecutiveAll: 0 },
-            { name: p4n, score: 0, consecutiveAll: 0 }
+            { name: p1n, score: 0 },
+            { name: p2n, score: 0 },
+            { name: p3n, score: 0 },
+            { name: p4n, score: 0 }
         ];
 
         rounds = [];
@@ -390,7 +396,7 @@
         document.getElementById("gameScreen").classList.remove("hidden");
         document.getElementById("inputArea").classList.remove("hidden");
         document.getElementById("turnIndicator").classList.remove("hidden");
-        document.getElementById("gameOverBanner").classList.add("hidden");
+        document.getElementById("gameOverBanner").className = "game-over-banner hidden";
         document.getElementById("btnNewGameAfterEnd").classList.add("hidden");
         document.getElementById("historyBody").innerHTML = "";
         
@@ -414,7 +420,7 @@
 
         players.forEach(p => {
             head.innerHTML += `<th>${p.name}</th>`;
-            body.innerHTML += `<td style="font-size:20px; font-weight:bold; color:${p.score >= 52 ? 'var(--danger)' : 'inherit'}">${p.score}</td>`;
+            body.innerHTML += `<td style="font-size:20px; font-weight:bold; color:${p.score >= 52 ? 'var(--danger)' : (p.score <= -100 ? 'var(--success)' : 'inherit')}">${p.score}</td>`;
             histHead.innerHTML += `<th>${p.name}</th>`;
         });
         histHead.innerHTML += `<th></th>`;
@@ -438,6 +444,7 @@
     function computeCurrentScores() {
         let roundScores = [0, 0, 0, 0];
         let positiveSum = 0;
+        let hasPlayerWithAtLeast13 = false;
 
         for(let i=0; i<4; i++) {
             const inputElem = document.getElementById(`score_input_${i}`);
@@ -448,10 +455,11 @@
             
             roundScores[i] = val;
             if (val > 0) positiveSum += val;
+            if (val >= 13) hasPlayerWithAtLeast13 = true; // RÄTTNING 3: Validering för minst 13 poäng
         }
 
         const totalSum = roundScores.reduce((a, b) => a + b, 0);
-        const isValid = (positiveSum === 26 && totalSum % 26 === 0);
+        const isValid = (positiveSum === 26 && totalSum % 26 === 0 && hasPlayerWithAtLeast13);
 
         return { scores: roundScores, sum: totalSum, isValid: isValid };
     }
@@ -483,20 +491,6 @@
         let roundScores = result.scores;
 
         for(let i=0; i<4; i++) {
-            if(roundScores[i] === 26) {
-                players[i].consecutiveAll++;
-                if(players[i].consecutiveAll >= 2) {
-                    triggerGameOver(currentLang === 'sv' ? 
-                        `${players[i].name} tog alla poäng två gånger i rad och har FÖRLORAT direkt!` : 
-                        (currentLang === 'de' ? `${players[i].name} hat zweimal hintereinander alle Punkte geholt und hat sofort VERLOREN!` : `${players[i].name} took all points twice in a row and LOST instantly!`));
-                    return;
-                }
-            } else {
-                players[i].consecutiveAll = 0;
-            }
-        }
-
-        for(let i=0; i<4; i++) {
             players[i].score += roundScores[i];
         }
 
@@ -504,11 +498,13 @@
 
         let shouldEnd = false;
         let endMsg = "";
+        let isVictory = false;
 
         players.forEach(p => {
             if(p.score <= -100) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått under -100p och har VUNNIT!` : (currentLang === 'de' ? `${p.name} hat unter -100P erreicht und hat GEWONNEN!` : `${p.name} reached under -100p and has WON!`);
                 shouldEnd = true;
+                isVictory = true; // Flagga för att det är en vinst (ska bli grönt)
             }
             if(p.score >= 52) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått 52p och är MAJA (Förlorare)!` : (currentLang === 'de' ? `${p.name} hat 52P erreicht und ist MAJA (Verlierer)!` : `${p.name} reached 52p and is MAJA (Loser)!`);
@@ -517,7 +513,7 @@
         });
 
         if(shouldEnd) {
-            triggerGameOver(endMsg);
+            triggerGameOver(endMsg, isVictory);
             return;
         }
 
@@ -563,9 +559,6 @@
             
             for (let i = 0; i < 4; i++) {
                 players[i].score -= removedRound.scores[i];
-                if (removedRound.scores[i] === 26 && players[i].consecutiveAll > 0) {
-                    players[i].consecutiveAll--;
-                }
             }
 
             currentRound--;
@@ -575,7 +568,7 @@
                 isGameOver = false;
                 document.getElementById("inputArea").classList.remove("hidden");
                 document.getElementById("turnIndicator").classList.remove("hidden");
-                document.getElementById("gameOverBanner").classList.add("hidden");
+                document.getElementById("gameOverBanner").className = "game-over-banner hidden";
                 document.getElementById("btnNewGameAfterEnd").classList.add("hidden");
             }
 
@@ -587,13 +580,20 @@
         }
     }
 
-    function triggerGameOver(msg) {
+    function triggerGameOver(msg, isVictory) {
         isGameOver = true;
         document.getElementById("inputArea").classList.add("hidden");
         
         const banner = document.getElementById("gameOverBanner");
         banner.innerText = msg;
-        banner.classList.remove("hidden");
+        
+        // RÄTTNING 2: Vinst får klassen 'win' (grön), förlust får klassen 'lose' (röd)
+        if(isVictory) {
+            banner.className = "game-over-banner win";
+        } else {
+            banner.className = "game-over-banner lose";
+        }
+        
         document.getElementById("btnNewGameAfterEnd").classList.remove("hidden");
         
         renderTable();
