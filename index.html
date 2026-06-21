@@ -57,7 +57,6 @@
             margin-top: 12px;
             box-sizing: border-box;
         }
-        .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
         label { display: block; margin-bottom: 3px; font-weight: bold; }
         input[type="text"], input[type="number"] {
@@ -310,7 +309,7 @@
                     <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
                 </div>
                 
-                <button class="btn btn-success hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
+                <button class="btn hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
             </div>
             
             <!-- HÖGER KOLUMN -->
@@ -323,7 +322,7 @@
                     <tbody id="historyBody"></tbody>
                 </table>
 
-                <button class="btn btn-danger" onclick="endGame()" id="btnEnd">Avbryt spel</button>
+                <button class="btn" onclick="endGame()" id="btnEnd">Starta nytt spel</button>
             </div>
         </div>
 
@@ -357,7 +356,7 @@
         sv: {
             rulesLink: "Regler", turn: "Det är <strong>{name}</strong>s tur att börja!",
             standings: "Nuvarande Ställning", enterRes: "Mata in resultat för runda {r}",
-            save: "Spara runda", history: "Historik", end: "Avbryt spel", start: "Starta Spelet",
+            save: "Spara runda", history: "Historik", end: "Starta nytt spel", start: "Starta Spelet",
             round: "Runda", rulesT: "Regler för Maja", newGame: "Starta nytt spel",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
@@ -374,7 +373,7 @@
         en: {
             rulesLink: "Rules", turn: "It is <strong>{name}</strong>'s turn to start!",
             standings: "Current Standings", enterRes: "Enter results for round {r}",
-            save: "Save round", history: "History", end: "End Game", start: "Start Game",
+            save: "Save round", history: "History", end: "Start new game", start: "Start Game",
             round: "Round", rulesT: "Maja Rules", newGame: "Start New Game",
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
@@ -391,12 +390,12 @@
         de: {
             rulesLink: "Regeln", turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
-            save: "Runde speichern", history: "Historie", end: "Spiel beenden", start: "Spiel starten",
+            save: "Runde speichern", history: "Historie", end: "Neues Spiel starten", start: "Spiel starten",
             round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
             rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
-                     <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
+                     <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verlierer er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
             sumText: "Gesamtpunktzahl der Runde: {sum} ({status})",
             sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein und mindestens ein Spieler muss ≥ 13 Punkte haben.",
             validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein und mindestens eine Person muss mindestens 13 Punkte haben.",
@@ -647,7 +646,6 @@
             display.className = "live-sum valid";
             display.innerHTML = l.sumText.replace("{sum}", result.currentSum).replace("{status}", l.sumValid);
             hideKeyboard();
-            // Återställ skrollpositionen ifall tangentbordet knuffade skärmen
             window.scrollTo(0, 0);
         } else {
             display.className = "live-sum invalid";
@@ -657,8 +655,6 @@
 
     function saveRound() {
         hideKeyboard();
-        
-        // Tvinga direkt upp vyn till toppen för att motverka iOS-tangentbordsförskjutning i landscape
         window.scrollTo(0, 0);
 
         const result = computeCurrentScores();
@@ -739,7 +735,6 @@
         renderInputs(); 
         renderHistory();
         
-        // Extra säkerhetskopia för att stanna kvar i topp efter DOM-renderingar
         setTimeout(() => window.scrollTo(0, 0), 10);
     }
 
