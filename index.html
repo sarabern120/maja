@@ -17,15 +17,13 @@
             --light: #f8f9fa;
         }
         html, body {
-            height: 100%;
             margin: 0;
             padding: 0;
             background-color: #e9ecef;
-            overflow-x: hidden;
-        }
-        body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: var(--dark);
+        }
+        body {
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -34,14 +32,15 @@
         }
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             background: white;
             padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             box-sizing: border-box;
         }
-        h1 { text-align: center; margin-top: 5px; margin-bottom: 10px; color: var(--dark); font-size: 24px; }
+        h1 { text-align: center; margin: 5px 0 10px 0; color: var(--dark); font-size: 24px; }
+        h3 { margin: 15px 0 8px 0; font-size: 18px; }
         .hidden { display: none !important; }
         .btn {
             display: block;
@@ -54,28 +53,29 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 12px;
+            box-sizing: border-box;
         }
         .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        label { display: block; margin-bottom: 3px; font-weight: bold; }
         input[type="text"], input[type="number"] {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 6px;
+            font-size: 16px; /* Förhindrar iOS auto-zoom vid fokus */
         }
         
-        /* RADER FÖR INSTÄLLNINGAR (ENBART PILAR) */
+        /* RADER FÖR INSTÄLLNINGAR */
         .setup-row {
             display: flex;
             align-items: center;
             background: var(--light);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border: 1px solid #dee2e6;
         }
         .setup-input-wrap {
@@ -84,19 +84,18 @@
         .order-arrows {
             display: flex;
             flex-direction: column;
-            margin-left: 15px;
+            margin-left: 12px;
         }
         .arrow-btn {
             background: #e9ecef;
             border: 1px solid #ced4da;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             padding: 4px 8px;
             color: var(--primary);
             margin: 2px 0;
         }
-        .arrow-btn:hover { background: #dee2e6; }
 
         .turn-indicator {
             background: #e3f2fd;
@@ -104,51 +103,46 @@
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            margin-top: 15px;
+            margin-top: 12px;
             border: 1px solid #b3e5fc;
+            font-size: 15px;
         }
         .game-over-banner {
             padding: 15px;
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            font-size: 20px;
-            margin-bottom: 15px;
-            animation: popIn 0.5s ease-out;
+            font-size: 18px;
+            margin-bottom: 12px;
+            animation: popIn 0.4s ease-out;
         }
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
+            0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .game-over-banner.lose {
-            background: #f8d7da;
-            color: var(--danger);
-            border: 2px solid var(--danger);
-        }
-        .game-over-banner.win {
-            background: #d4edda;
-            color: var(--success);
-            border: 2px solid var(--success);
-        }
+        .game-over-banner.lose { background: #f8d7da; color: var(--danger); border: 2px solid var(--danger); }
+        .game-over-banner.win { background: #d4edda; color: var(--success); border: 2px solid var(--success); }
+        
         .player-row {
             background: var(--light);
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-left: 5px solid var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .player-name-title { font-size: 18px; margin: 0; font-weight: bold; color: var(--primary); }
+        .player-name-title { font-size: 16px; margin: 0; font-weight: bold; color: var(--primary); }
         .score-input {
-            width: 80px;
+            width: 70px;
             font-size: 16px;
             text-align: center;
-            padding: 8px;
+            padding: 6px;
         }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #ddd; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
+        th, td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; }
         th { background: #f1f3f5; }
         
         .delete-btn {
@@ -156,17 +150,18 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
-            padding: 0 5px;
+            padding: 0;
             width: 24px;
             height: 24px;
         }
         
         .rules-section {
             background: #fff3cd;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: 1px solid #ffeeba;
+            font-size: 14px;
         }
         .top-bar {
             display: flex;
@@ -180,34 +175,29 @@
             font-weight: bold;
             font-size: 14px;
         }
-        .rules-anchor:hover { text-decoration: underline; }
-        .lang-switch { display: flex; gap: 8px; }
+        .lang-switch { display: flex; gap: 6px; }
         .flag-btn {
             background: none;
             border: 2px solid transparent;
             cursor: pointer;
             padding: 2px;
             border-radius: 4px;
-            line-height: 1;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
         }
         .flag-btn.active {
             border-color: var(--primary);
             background: #e9ecef;
         }
-        .flag-btn img.emoji {
-            width: 28px;
-            height: 28px;
-        }
+        .flag-btn img.emoji { width: 24px; height: 24px; }
+        
         .live-sum {
             background: #f1f3f5;
             padding: 8px;
             border-radius: 6px;
             text-align: center;
             font-weight: bold;
-            margin-top: 15px;
+            margin-top: 12px;
             font-size: 14px;
         }
         .live-sum.valid { color: var(--success); }
@@ -215,10 +205,10 @@
         
         .app-footer {
             text-align: center;
-            margin-top: 25px;
-            padding-top: 15px;
+            margin-top: 20px;
+            padding-top: 12px;
             border-top: 1px dashed #ccc;
-            font-size: 13px;
+            font-size: 12px;
             color: #6c757d;
             font-style: italic;
         }
@@ -226,7 +216,7 @@
 </head>
 <body>
 
-<div class="container" id="appContainer">
+<div class="container">
     <!-- TOPPBAR: REGLERLÄNK OCH FLAGGBUTTONS -->
     <div class="top-bar">
         <a href="#rulesAnchorPoint" class="rules-anchor" id="lnkRules">Regler</a>
@@ -302,7 +292,7 @@
 
         <!-- Inmatningsformulär -->
         <div id="inputArea">
-            <h3 id="lblEnterResults" style="margin-top:20px;">Mata in resultat för runda 1</h3>
+            <h3 id="lblEnterResults">Mata in resultat för runda 1</h3>
             <div id="inputsContainer"></div>
 
             <div id="liveSumDisplay" class="live-sum hidden">Rundans totala poängsumma: 0</div>
@@ -313,7 +303,7 @@
         
         <button class="btn btn-success hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
         
-        <h3 id="lblHistory" style="margin-top:20px;">Historik</h3>
+        <h3 id="lblHistory">Historik</h3>
         <table>
             <thead>
                 <tr id="historyHeaders"><th>Runda</th></tr>
@@ -403,34 +393,6 @@
         }
     };
 
-    // Automatisk zoom-anpassning för att fylla ut fönstret utan onödig scroll
-    function adjustZoom() {
-        const container = document.getElementById('appContainer');
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        
-        // Återställ först till grundskala
-        container.style.transform = 'none';
-        container.style.marginTop = '0px';
-        
-        const containerWidth = container.offsetWidth;
-        const containerHeight = container.offsetHeight;
-        
-        let scaleX = (windowWidth - 20) / containerWidth;
-        let scaleY = (windowHeight - 20) / containerHeight;
-        
-        // Välj den mest begränsande skalan, men zooma inte in mer än 100% (skala 1) originalstorlek på stora skärmar
-        let finalScale = Math.min(scaleX, scaleY);
-        if (finalScale > 1) finalScale = 1; 
-        
-        if (finalScale < 1) {
-            container.style.transform = `scale(${finalScale})`;
-            container.style.transformOrigin = 'top center';
-        }
-    }
-
-    window.addEventListener('resize', adjustZoom);
-
     // Syntetiskt pop-ljud via Web Audio API
     function playPopSound() {
         try {
@@ -457,47 +419,33 @@
         }
     }
 
-    // Talsyntes anpassad för valda språket och ökad entusiasm
+    // Talsyntes med hög entusiasm på valt språk
     function speakMaja(playerName) {
         if ('speechSynthesis' in window) {
             const template = texts[currentLang].ttsMaja;
             const textToSpeak = template.replace("{name}", playerName);
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
             
-            // Sätt rätt språkkod till talsyntesen
             if (currentLang === 'sv') utterance.lang = 'sv-SE';
             else if (currentLang === 'de') utterance.lang = 'de-DE';
             else utterance.lang = 'en-US';
             
-            utterance.rate = 1.05; // Lite snabbare tempo för glada utrop
-            utterance.pitch = 1.25; // Högre pitch för mer entusiasm och energi
+            utterance.rate = 1.05; 
+            utterance.pitch = 1.3; // Hög och glad tonhöjd för maximal entusiasm!
             window.speechSynthesis.speak(utterance);
         }
     }
 
-    // Funktion för att spruta konfetti
+    // Funktion för konfetti
     function triggerConfetti() {
         if (typeof confetti === 'function') {
             var duration = 3.5 * 1000;
             var end = Date.now() + duration;
 
             (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 60,
-                    origin: { x: 0, y: 0.8 }
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 60,
-                    origin: { x: 1, y: 0.8 }
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
+                confetti({ particleCount: 5, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
+                confetti({ particleCount: 5, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
         }
     }
@@ -536,7 +484,6 @@
         if(lang === 'de') document.getElementById("btnLangDe").classList.add("active");
 
         updateLanguageDOM();
-        setTimeout(adjustZoom, 50);
     }
 
     function updateLanguageDOM() {
@@ -601,9 +548,7 @@
         
         updateLanguageDOM();
         renderInputs(); 
-        
-        // Anpassar zoomnivån direkt när spelet drar igång
-        setTimeout(adjustZoom, 50);
+        window.scrollTo(0, 0);
     }
 
     function updateTurnIndicator() {
@@ -654,16 +599,11 @@
             const inputElem = document.getElementById(`score_input_${i}`);
             if(!inputElem) return { scores: [0,0,0,0], isValid: false, hasAnyInput: false, zeroCount: 0 };
             
-            if(inputElem.value !== "") {
-                hasAnyInput = true;
-            }
+            if(inputElem.value !== "") hasAnyInput = true;
             
             let val = parseInt(inputElem.value);
             if (isNaN(val)) val = 0; 
-            
-            if (val === 0) {
-                zeroCountInRound++;
-            }
+            if (val === 0) zeroCountInRound++;
             
             inputScores[i] = val;
             totalSum += val;
@@ -671,7 +611,6 @@
         }
 
         const isValid = (totalSum === 26 && hasPlayerWithAtLeast13);
-
         return { scores: inputScores, isValid: isValid, hasAnyInput: hasAnyInput, zeroCount: zeroCountInRound };
     }
 
@@ -712,9 +651,7 @@
 
         if (result.zeroCount === 3) {
             let zeroIndices = [];
-            finalRoundScores.forEach((s, idx) => {
-                if (s === 0) zeroIndices.push(idx);
-            });
+            finalRoundScores.forEach((s, idx) => { if (s === 0) zeroIndices.push(idx); });
 
             let lowestTotalScore = Infinity;
             let lowestPlayerIdx = -1;
@@ -727,22 +664,14 @@
             });
 
             zeroIndices.forEach(idx => {
-                if (idx === lowestPlayerIdx) {
-                    finalRoundScores[idx] = -8;
-                } else {
-                    finalRoundScores[idx] = -9;
-                }
+                if (idx === lowestPlayerIdx) finalRoundScores[idx] = -8;
+                else finalRoundScores[idx] = -9;
             });
 
         } else if (result.zeroCount === 2) {
-            finalRoundScores.forEach((s, idx) => {
-                if (s === 0) finalRoundScores[idx] = -13;
-            });
-
+            finalRoundScores.forEach((s, idx) => { if (s === 0) finalRoundScores[idx] = -13; });
         } else if (result.zeroCount === 1) {
-            finalRoundScores.forEach((s, idx) => {
-                if (s === 0) finalRoundScores[idx] = -26;
-            });
+            finalRoundScores.forEach((s, idx) => { if (s === 0) finalRoundScores[idx] = -26; });
         }
 
         for(let i=0; i<4; i++) {
@@ -772,12 +701,9 @@
 
         if(shouldEnd) {
             triggerGameOver(endMsg, isVictory);
-            
             playPopSound();
             triggerConfetti();
-            if (targetMajaPlayer !== "") {
-                speakMaja(targetMajaPlayer);
-            }
+            if (targetMajaPlayer !== "") speakMaja(targetMajaPlayer);
             return;
         }
 
@@ -790,7 +716,6 @@
         renderTable();
         renderInputs(); 
         renderHistory();
-        setTimeout(adjustZoom, 30);
     }
 
     function renderHistory() {
@@ -800,16 +725,13 @@
         for (let i = rounds.length - 1; i >= 0; i--) {
             const r = rounds[i];
             let rowHtml = `<tr><td><strong>R${r.roundNumber}</strong></td>`;
-            r.scores.forEach(s => {
-                rowHtml += `<td>${s > 0 ? '+' : ''}${s}</td>`;
-            });
+            r.scores.forEach(s => { rowHtml += `<td>${s > 0 ? '+' : ''}${s}</td>`; });
             
             if (i === rounds.length - 1) {
                 rowHtml += `<td><button class="delete-btn" onclick="deleteLastRound()" title="Ångra runda">🗑️</button></td>`;
             } else {
                 rowHtml += `<td></td>`;
             }
-            
             rowHtml += `</tr>`;
             hBody.innerHTML += rowHtml;
         }
@@ -821,9 +743,7 @@
         
         if (confirm(l.confirmDelete)) {
             const removedRound = rounds.pop();
-            for (let i = 0; i < 4; i++) {
-                players[i].score -= removedRound.scores[i];
-            }
+            for (let i = 0; i < 4; i++) { players[i].score -= removedRound.scores[i]; }
 
             currentRound--;
             startingPlayerIndex = (startingPlayerIndex - 1 + 4) % 4;
@@ -841,7 +761,6 @@
             renderTable();
             renderInputs();
             renderHistory();
-            setTimeout(adjustZoom, 30);
         }
     }
 
@@ -851,20 +770,14 @@
         
         const banner = document.getElementById("gameOverBanner");
         banner.innerText = msg;
-        
-        if(isVictory) {
-            banner.className = "game-over-banner win";
-        } else {
-            banner.className = "game-over-banner lose";
-        }
+        banner.className = isVictory ? "game-over-banner win" : "game-over-banner lose";
         
         document.getElementById("btnNewGameAfterEnd").classList.remove("hidden");
         renderTable();
         renderHistory();
         
-        // Stå på topp: Tvingar fönstret att skrolla allra längst upp direkt
+        // Drar mjukt upp fönstret till absolut topp så vinst/förlust syns direkt!
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        setTimeout(adjustZoom, 50);
     }
 
     function endGame() {
@@ -883,12 +796,12 @@
         players = [];
         isGameOver = false;
         updateLanguageDOM();
-        setTimeout(adjustZoom, 50);
+        window.scrollTo(0, 0);
     }
 
     window.onload = function() {
         updateLanguageDOM();
-        setTimeout(adjustZoom, 100);
+        window.scrollTo(0, 0);
     };
 </script>
 
