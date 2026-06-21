@@ -153,7 +153,7 @@
             font-size: 14px;
         }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .rules-anchor { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; }
+        .rules-anchor { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
         .lang-switch { display: flex; gap: 6px; }
         .flag-btn {
             background: none;
@@ -224,7 +224,7 @@
 <div class="container">
     <!-- TOPPBAR: REGLERLÄNK OCH FLAGGBUTTONS -->
     <div class="top-bar">
-        <a href="#rulesAnchorPoint" class="rules-anchor" id="lnkRules">Regler</a>
+        <span class="rules-anchor" id="lnkRules" onclick="toggleRules()">Regler</span>
         <div class="lang-switch" id="langSwitchArea">
             <button class="flag-btn active" id="btnLangSv" onclick="setLanguage('sv')" title="Svenska">🇸🇪</button>
             <button class="flag-btn" id="btnLangEn" onclick="setLanguage('en')" title="English">🇬🇧</button>
@@ -325,11 +325,10 @@
                 <button class="btn" onclick="endGame()" id="btnEnd">Starta nytt spel</button>
             </div>
         </div>
-
-        <div id="rulesAnchorPoint"></div>
     </div>
 
-    <div class="rules-section">
+    <!-- REGLER (DOLD SOM STANDARD) -->
+    <div class="rules-section hidden" id="rulesBlock">
         <h3 id="rulesTitle">Regler för Maja</h3>
         <div id="rulesContent"></div>
     </div>
@@ -405,6 +404,12 @@
             ttsMaja: "Jetzt ist {name} die Maja geworden! Herzlichen Glückwunsch!!!"
         }
     };
+
+    // Funktion för att dölja/visa reglerna vid klick
+    function toggleRules() {
+        const rulesBlock = document.getElementById("rulesBlock");
+        rulesBlock.classList.toggle("hidden");
+    }
 
     function hideKeyboard() {
         for (let i = 0; i < 4; i++) {
@@ -805,6 +810,7 @@
         hideKeyboard();
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
+        document.getElementById("rulesBlock").classList.add("hidden"); // Döljer reglerna vid nytt spel
         
         const rows = document.querySelectorAll('.setup-row');
         players.forEach((p, i) => {
