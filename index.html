@@ -288,7 +288,6 @@
             <h3 id="lblEnterResults" style="margin-top:20px;">Mata in resultat för runda 1</h3>
             <div id="inputsContainer"></div>
 
-            <!-- RÄTTNING 2: Dold som standard (class hidden lades till) -->
             <div id="liveSumDisplay" class="live-sum hidden">Rundans totala poängsumma: 0</div>
             <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
             
@@ -341,7 +340,7 @@
             round: "Runda", rulesT: "Regler för Maja", newGame: "Starta nytt spel",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
-                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har högst totalpoäng -8p, och de andra två får -9p var.</p>
+                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har MINST totalpoäng -8p, och de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt).</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26, summan delbar med 26 och minst en spelare måste ha ≥ 13 poäng.",
@@ -357,7 +356,7 @@
             round: "Round", rulesT: "Maja Rules", newGame: "Start New Game",
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
-                     <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the highest total score gets -8p, and the other two get -9p each.</p>
+                     <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the MINIMUM total score gets -8p, and the other two get -9p each.</p>
                      <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly.</p>`,
             sumText: "Round total score sum: {sum} ({status})",
             sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, total sum divisible by 26, and at least one player must have ≥ 13 points.",
@@ -373,7 +372,7 @@
             round: "Runde", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
             rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
-                     <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der höchsten Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
+                     <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
                      <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
             sumText: "Gesamtpunktzahl der Runde: {sum} ({status})",
             sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein, die Summe durch 26 teilbar sein und mindestens ein Spieler muss ≥ 13 Punkte haben.",
@@ -518,7 +517,6 @@
                 </div>
             `;
         });
-        // Dölj rutan helt vid rendering av nya tomma fält
         document.getElementById("liveSumDisplay").classList.add("hidden");
     }
 
@@ -526,14 +524,14 @@
         let roundScores = [0, 0, 0, 0];
         let positiveSum = 0;
         let hasPlayerWithAtLeast13 = false;
-        let hasAnyInput = false; // Spårar om användaren börjat skriva något
+        let hasAnyInput = false;
 
         for(let i=0; i<4; i++) {
             const inputElem = document.getElementById(`score_input_${i}`);
             if(!inputElem) return { scores: [0,0,0,0], sum: 0, isValid: true, hasAnyInput: false };
             
             if(inputElem.value !== "") {
-                hasAnyInput = true; // Användaren har skrivit i minst ett fält!
+                hasAnyInput = true;
             }
             
             let val = parseInt(inputElem.value);
@@ -556,7 +554,6 @@
         const display = document.getElementById("liveSumDisplay");
         const l = texts[currentLang];
 
-        // RÄTTNING 2: Visa bara rutan om man faktiskt har börjat skriva poäng
         if (!result.hasAnyInput) {
             display.classList.add("hidden");
             return;
@@ -583,6 +580,36 @@
         }
 
         let roundScores = result.scores;
+
+        // KORRIGERING: Kontrollera logiken om exakt tre spelare fick 0 stick i denna runda (dvs totalpoäng -26)
+        let zeroTrickCount = roundScores.filter(s => s < 0).length;
+        if (zeroTrickCount === 3) {
+            // Hitta index på de tre spelarna som fick nollstick
+            let zeroTrickIndices = [];
+            roundScores.forEach((s, idx) => {
+                if (s < 0) zeroTrickIndices.push(idx);
+            });
+
+            // Ta reda på vem av de tre som har MINST totalpoäng just nu (innan runda adderas)
+            let lowestScore = Infinity;
+            let lowestIdx = -1;
+
+            zeroTrickIndices.forEach(idx => {
+                if (players[idx].score < lowestScore) {
+                    lowestScore = players[idx].score;
+                    lowestIdx = idx;
+                }
+            });
+
+            // Tilldela -8p till den med minst poäng, och -9p till de andra två nollstickarna
+            zeroTrickIndices.forEach(idx => {
+                if (idx === lowestIdx) {
+                    roundScores[idx] = -8;
+                } else {
+                    roundScores[idx] = -9;
+                }
+            });
+        }
 
         for(let i=0; i<4; i++) {
             players[i].score += roundScores[i];
