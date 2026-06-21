@@ -6,6 +6,8 @@
     <title>Bern's Maja</title>
     <!-- Laddar in Twemoji för att garantera att flaggorna visas som bilder i alla webbläsare -->
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
+    <!-- Laddar in Canvas-Confetti för slutanimationen -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --primary: #007bff;
@@ -383,6 +385,72 @@
         }
     };
 
+    // Syntetiskt pop-ljud via Web Audio API (inga externa filer krävs)
+    function playPopSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            // Snabbt stigande frekvens för att skapa ett "pop"-ljud
+            osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.12);
+            
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + 0.15);
+        } catch(e) {
+            console.log("Kunde inte spela pop-ljud:", e);
+        }
+    }
+
+    // Talsyntes som läser upp förloraren
+    function speakMaja(playerName) {
+        if ('speechSynthesis' in window) {
+            const textToSpeak = `Nu har ${playerName} blivit Maja! Grattis!`;
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'sv-SE';
+            utterance.rate = 0.9; // Lite lugnare tempo för tydlighet
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    // Funktion för att spruta konfetti
+    function triggerConfetti() {
+        if (typeof confetti === 'function') {
+            // Skjut konfetti i 3 sekunder från sidorna
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 4,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.8 }
+                });
+                confetti({
+                    particleCount: 4,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.8 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    }
+
     function moveRow(button, direction) {
         const row = button.closest('.setup-row');
         const container = document.getElementById('sortableInputsContainer');
@@ -547,7 +615,6 @@
             if (val >= 13) hasPlayerWithAtLeast13 = true;
         }
 
-        // Grundvalidering: De inmatade pluspoängen måste vara exakt 26 totalt, och minst en spelare har tagit spader dam (>=13)
         const isValid = (totalSum === 26 && hasPlayerWithAtLeast13);
 
         return { scores: inputScores, isValid: isValid, hasAnyInput: hasAnyInput, zeroCount: zeroCountInRound };
@@ -566,7 +633,6 @@
             display.classList.remove("hidden");
         }
 
-        // Summera de synliga inmatade poängen
         let currentSum = result.scores.reduce((a, b) => a + b, 0);
 
         if(result.isValid) {
@@ -587,18 +653,14 @@
             return;
         }
 
-        // Skapa en kopia av de inmatade poängen att spara och fördela
         let finalRoundScores = [...result.scores];
 
-        // LOGIK FÖR NOLLSTICK (Beräknas automatiskt utifrån antalet spelare som fick 0p i rundan)
         if (result.zeroCount === 3) {
-            // Tre spelare fick 0 stick. Hitta index för dessa tre spelare.
             let zeroIndices = [];
             finalRoundScores.forEach((s, idx) => {
                 if (s === 0) zeroIndices.push(idx);
             });
 
-            // Ta reda på vem av de tre nollstickarna som har MINST totalpoäng i protokollet just nu
             let lowestTotalScore = Infinity;
             let lowestPlayerIdx = -1;
 
@@ -609,7 +671,6 @@
                 }
             });
 
-            // Den med minst totalpoäng får -8p, de andra två får -9p var
             zeroIndices.forEach(idx => {
                 if (idx === lowestPlayerIdx) {
                     finalRoundScores[idx] = -8;
@@ -619,19 +680,16 @@
             });
 
         } else if (result.zeroCount === 2) {
-            // Två spelare fick 0 stick. Båda får -13p var.
             finalRoundScores.forEach((s, idx) => {
                 if (s === 0) finalRoundScores[idx] = -13;
             });
 
         } else if (result.zeroCount === 1) {
-            // En spelare fick 0 stick. Den får -26p.
             finalRoundScores.forEach((s, idx) => {
                 if (s === 0) finalRoundScores[idx] = -26;
             });
         }
 
-        // Applicera rundans slutgiltiga poäng till spelarnas totaler
         for(let i=0; i<4; i++) {
             players[i].score += finalRoundScores[i];
         }
@@ -641,6 +699,7 @@
         let shouldEnd = false;
         let endMsg = "";
         let isVictory = false;
+        let targetMajaPlayer = "";
 
         players.forEach(p => {
             if(p.score <= -100) {
@@ -651,11 +710,19 @@
             if(p.score >= 52) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått 52p och är MAJA (Förlorare)!` : (currentLang === 'de' ? `${p.name} hat 52P erreicht und ist MAJA (Verlierer)!` : `${p.name} reached 52p and is MAJA (Loser)!`);
                 shouldEnd = true;
+                targetMajaPlayer = p.name; // Sparar namnet på den som blev Maja
             }
         });
 
         if(shouldEnd) {
             triggerGameOver(endMsg, isVictory);
+            
+            // Kör ljud och effekter!
+            playPopSound();
+            triggerConfetti();
+            if (targetMajaPlayer !== "") {
+                speakMaja(targetMajaPlayer);
+            }
             return;
         }
 
@@ -721,7 +788,6 @@
         }
     }
 
-    // Pilarna på förstasidan
     function triggerGameOver(msg, isVictory) {
         isGameOver = true;
         document.getElementById("inputArea").classList.add("hidden");
