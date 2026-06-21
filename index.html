@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bern's Maja</title>
-    <!-- Laddar in Twemoji för att garantera att flaggorna visas som bilder i alla webbläsare (Chrome, Edge etc) -->
+    <!-- Laddar in Twemoji för att garantera att flaggorna visas som bilder i alla webbläsare -->
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <style>
         :root {
@@ -55,6 +55,47 @@
             border: 1px solid #ccc;
             border-radius: 6px;
         }
+        
+        /* REORGANISERA SPELARE (DRAG & DROP + PILAR) */
+        .setup-row {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px dashed #ccc;
+            cursor: grab;
+            user-select: none;
+        }
+        .setup-row.dragging {
+            opacity: 0.5;
+            background: #e3f2fd;
+        }
+        .drag-handle {
+            font-size: 20px;
+            color: #888;
+            margin-right: 12px;
+            cursor: grab;
+        }
+        .setup-input-wrap {
+            flex-grow: 1;
+        }
+        .order-arrows {
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+        }
+        .arrow-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 5px;
+            color: var(--primary);
+        }
+        .arrow-btn:hover { opacity: 0.7; }
+
         .turn-indicator {
             background: #e3f2fd;
             padding: 10px;
@@ -102,13 +143,17 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 8px; text-align: center; border-bottom: 1px solid #ddd; }
         th { background: #f1f3f5; }
+        
         .delete-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 16px; /* Låst storlek */
             padding: 0 5px;
+            width: 24px;
+            height: 24px;
         }
+        
         .rules-section {
             background: #fff3cd;
             padding: 15px;
@@ -174,11 +219,11 @@
 </head>
 <body>
 
-<div class="container" id="mainContainer">
+<div class="container">
     <!-- TOPPBAR: REGLERLÄNK OCH FLAGGBUTTONS -->
     <div class="top-bar">
         <a href="#rulesAnchorPoint" class="rules-anchor" id="lnkRules">Regler</a>
-        <div class="lang-switch">
+        <div class="lang-switch" id="langSwitchArea">
             <button class="flag-btn active" id="btnLangSv" onclick="setLanguage('sv')" title="Svenska">🇸🇪</button>
             <button class="flag-btn" id="btnLangEn" onclick="setLanguage('en')" title="English">🇬🇧</button>
             <button class="flag-btn" id="btnLangDe" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
@@ -187,30 +232,59 @@
 
     <h1>Bern's Maja</h1>
 
-    <!-- SKÄRM 1: INSTÄLLNINGAR -->
+    <!-- SKÄRM 1: INSTÄLLNINGAR (Med sorterbara rader) -->
     <div id="setupScreen">
-        <div class="form-group">
-            <label id="lblP1">Spelare 1</label>
-            <input type="text" id="p1" value="" placeholder="Spelare 1">
-        </div>
-        <div class="form-group">
-            <label id="lblP2">Spelare 2</label>
-            <input type="text" id="p2" value="" placeholder="Spelare 2">
-        </div>
-        <div class="form-group">
-            <label id="lblP3">Spelare 3</label>
-            <input type="text" id="p3" value="" placeholder="Spelare 3">
-        </div>
-        <div class="form-group">
-            <label id="lblP4">Spelare 4</label>
-            <input type="text" id="p4" value="" placeholder="Spelare 4">
+        <div id="sortableInputsContainer">
+            <div class="setup-row" draggable="true" data-index="1">
+                <div class="drag-handle">☰</div>
+                <div class="setup-input-wrap">
+                    <label id="lblP1" style="font-size: 12px; margin-bottom:2px;">Spelare 1</label>
+                    <input type="text" id="p1" value="" placeholder="Spelare 1">
+                </div>
+                <div class="order-arrows">
+                    <button class="arrow-btn" onclick="moveRow(this, -1)">▲</button>
+                    <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
+                </div>
+            </div>
+            <div class="setup-row" draggable="true" data-index="2">
+                <div class="drag-handle">☰</div>
+                <div class="setup-input-wrap">
+                    <label id="lblP2" style="font-size: 12px; margin-bottom:2px;">Spelare 2</label>
+                    <input type="text" id="p2" value="" placeholder="Spelare 2">
+                </div>
+                <div class="order-arrows">
+                    <button class="arrow-btn" onclick="moveRow(this, -1)">▲</button>
+                    <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
+                </div>
+            </div>
+            <div class="setup-row" draggable="true" data-index="3">
+                <div class="drag-handle">☰</div>
+                <div class="setup-input-wrap">
+                    <label id="lblP3" style="font-size: 12px; margin-bottom:2px;">Spelare 3</label>
+                    <input type="text" id="p3" value="" placeholder="Spelare 3">
+                </div>
+                <div class="order-arrows">
+                    <button class="arrow-btn" onclick="moveRow(this, -1)">▲</button>
+                    <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
+                </div>
+            </div>
+            <div class="setup-row" draggable="true" data-index="4">
+                <div class="drag-handle">☰</div>
+                <div class="setup-input-wrap">
+                    <label id="lblP4" style="font-size: 12px; margin-bottom:2px;">Spelare 4</label>
+                    <input type="text" id="p4" value="" placeholder="Spelare 4">
+                </div>
+                <div class="order-arrows">
+                    <button class="arrow-btn" onclick="moveRow(this, -1)">▲</button>
+                    <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
+                </div>
+            </div>
         </div>
         <button class="btn btn-success" onclick="startGame()" id="btnStart">Starta Spelet</button>
     </div>
 
     <!-- SKÄRM 2: SPELPLAN -->
     <div id="gameScreen" class="hidden">
-        <!-- Slutskärmsmeddelande överst om klart -->
         <div class="game-over-banner hidden" id="gameOverBanner">Spelet är slut!</div>
 
         <h3 id="lblStandings">Nuvarande Ställning</h3>
@@ -231,15 +305,13 @@
             <div id="liveSumDisplay" class="live-sum">Rundans totala poängsumma: 0</div>
             <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
             
-            <!-- Turordning ligger under knappen -->
             <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
         </div>
         
-        <!-- Knapp som visas när spelet är slut -->
         <button class="btn btn-success hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
         
         <h3 id="lblHistory" style="margin-top:20px;">Historik</h3>
-        <table id="historyTable">
+        <table>
             <thead>
                 <tr id="historyHeaders"><th>Runda</th></tr>
             </thead>
@@ -249,16 +321,13 @@
         <button class="btn btn-danger" onclick="endGame()" id="btnEnd">Avbryt spel</button>
     </div>
 
-    <!-- ANCHOR POINT FÖR REGLER -->
     <div id="rulesAnchorPoint"></div>
 
-    <!-- REGLER -->
     <div class="rules-section">
         <h3 id="rulesTitle">Regler för Maja</h3>
         <div id="rulesContent"></div>
     </div>
 
-    <!-- TILLÄGNAN TILL GÖRAN BERN -->
     <div class="app-footer" id="appFooter">
         Tillägnad Göran Bern som lärde oss alla att spela Maja.
     </div>
@@ -272,6 +341,7 @@
     let currentLang = 'sv';
     let isGameOver = false;
 
+    // Ladda sparade värden till placeholders
     if(localStorage.getItem("maja_p1")) document.getElementById("p1").placeholder = localStorage.getItem("maja_p1");
     if(localStorage.getItem("maja_p2")) document.getElementById("p2").placeholder = localStorage.getItem("maja_p2");
     if(localStorage.getItem("maja_p3")) document.getElementById("p3").placeholder = localStorage.getItem("maja_p3");
@@ -314,7 +384,7 @@
             rulesLink: "Regeln", turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", end: "Spiel beenden", start: "Spiel starten",
-            round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
+            round: "Runde", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
             rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der höchsten Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
@@ -328,9 +398,33 @@
         }
     };
 
+    // KNAPPAR: Flytta rader manuellt via pilar
+    function moveRow(button, direction) {
+        const row = button.closest('.setup-row');
+        const container = document.getElementById('sortableInputsContainer');
+        if (direction === -1 && row.previousElementSibling) {
+            container.insertBefore(row, row.previousElementSibling);
+        } else if (direction === 1 && row.nextElementSibling) {
+            container.insertBefore(row, row.nextElementSibling.nextElementSibling);
+        }
+        updateSetupLabels();
+    }
+
+    // Funktion för att justera etiketterna (Spelare 1-4) dynamiskt efter omflyttning
+    function updateSetupLabels() {
+        const rows = document.querySelectorAll('.setup-row');
+        const l = texts[currentLang];
+        rows.forEach((row, i) => {
+            const label = row.querySelector('label');
+            if(i === 0) label.innerText = l.p1Label;
+            if(i === 1) label.innerText = l.p2Label;
+            if(i === 2) label.innerText = l.p3Label;
+            if(i === 3) label.innerText = l.p4Label;
+        });
+    }
+
     function setLanguage(lang) {
         currentLang = lang;
-        
         document.getElementById("btnLangSv").classList.remove("active");
         document.getElementById("btnLangEn").classList.remove("active");
         document.getElementById("btnLangDe").classList.remove("active");
@@ -353,11 +447,9 @@
         document.getElementById("rulesTitle").innerText = l.rulesT;
         document.getElementById("rulesContent").innerHTML = l.rulesC;
         document.getElementById("btnNewGameAfterEnd").innerText = l.newGame;
-        document.getElementById("lblP1").innerText = l.p1Label;
-        document.getElementById("lblP2").innerText = l.p2Label;
-        document.getElementById("lblP3").innerText = l.p3Label;
-        document.getElementById("lblP4").innerText = l.p4Label;
         document.getElementById("appFooter").innerText = l.footerText;
+        
+        updateSetupLabels();
         
         if (players.length > 0) {
             if (!isGameOver) updateTurnIndicator();
@@ -366,25 +458,32 @@
             calculateLiveSum();
             renderHistory();
         }
-        twemoji.parse(document.getElementById("mainContainer"));
+        // RÄTTNING 2: Kör Twemoji ENBART på språkbytesrutan så att papperskorgen lämnas orörd
+        twemoji.parse(document.getElementById("langSwitchArea"));
     }
 
     function startGame() {
-        const p1n = document.getElementById("p1").value || document.getElementById("p1").placeholder || "Spelare 1";
-        const p2n = document.getElementById("p2").value || document.getElementById("p2").placeholder || "Spelare 2";
-        const p3n = document.getElementById("p3").value || document.getElementById("p3").placeholder || "Spelare 3";
-        const p4n = document.getElementById("p4").value || document.getElementById("p4").placeholder || "Spelare 4";
+        // Hämta inputfält i den ordning de ligger i DOM just nu
+        const rows = document.querySelectorAll('.setup-row');
+        const pNames = [];
 
-        localStorage.setItem("maja_p1", p1n);
-        localStorage.setItem("maja_p2", p2n);
-        localStorage.setItem("maja_p3", p3n);
-        localStorage.setItem("maja_p4", p4n);
+        rows.forEach((row) => {
+            const input = row.querySelector('input[type="text"]');
+            const finalName = input.value || input.placeholder || "Spelare";
+            pNames.push(finalName);
+        });
+
+        // Spara till localStorage (alltid i fasta nycklar för framtida placeholders)
+        localStorage.setItem("maja_p1", pNames[0]);
+        localStorage.setItem("maja_p2", pNames[1]);
+        localStorage.setItem("maja_p3", pNames[2]);
+        localStorage.setItem("maja_p4", pNames[3]);
 
         players = [
-            { name: p1n, score: 0 },
-            { name: p2n, score: 0 },
-            { name: p3n, score: 0 },
-            { name: p4n, score: 0 }
+            { name: pNames[0], score: 0 },
+            { name: pNames[1], score: 0 },
+            { name: pNames[2], score: 0 },
+            { name: pNames[3], score: 0 }
         ];
 
         rounds = [];
@@ -455,7 +554,7 @@
             
             roundScores[i] = val;
             if (val > 0) positiveSum += val;
-            if (val >= 13) hasPlayerWithAtLeast13 = true; // RÄTTNING 3: Validering för minst 13 poäng
+            if (val >= 13) hasPlayerWithAtLeast13 = true;
         }
 
         const totalSum = roundScores.reduce((a, b) => a + b, 0);
@@ -504,7 +603,7 @@
             if(p.score <= -100) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått under -100p och har VUNNIT!` : (currentLang === 'de' ? `${p.name} hat unter -100P erreicht und hat GEWONNEN!` : `${p.name} reached under -100p and has WON!`);
                 shouldEnd = true;
-                isVictory = true; // Flagga för att det är en vinst (ska bli grönt)
+                isVictory = true;
             }
             if(p.score >= 52) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått 52p och är MAJA (Förlorare)!` : (currentLang === 'de' ? `${p.name} hat 52P erreicht und ist MAJA (Verlierer)!` : `${p.name} reached 52p and is MAJA (Loser)!`);
@@ -556,7 +655,6 @@
         
         if (confirm(l.confirmDelete)) {
             const removedRound = rounds.pop();
-            
             for (let i = 0; i < 4; i++) {
                 players[i].score -= removedRound.scores[i];
             }
@@ -587,7 +685,6 @@
         const banner = document.getElementById("gameOverBanner");
         banner.innerText = msg;
         
-        // RÄTTNING 2: Vinst får klassen 'win' (grön), förlust får klassen 'lose' (röd)
         if(isVictory) {
             banner.className = "game-over-banner win";
         } else {
@@ -595,7 +692,6 @@
         }
         
         document.getElementById("btnNewGameAfterEnd").classList.remove("hidden");
-        
         renderTable();
         renderHistory();
     }
@@ -604,19 +700,64 @@
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
         
-        if (players.length > 0) {
-            document.getElementById("p1").placeholder = players[0].name;
-            document.getElementById("p2").placeholder = players[1].name;
-            document.getElementById("p3").placeholder = players[2].name;
-            document.getElementById("p4").placeholder = players[3].name;
-        }
-        document.getElementById("p1").value = "";
-        document.getElementById("p2").value = "";
-        document.getElementById("p3").value = "";
-        document.getElementById("p4").value = "";
+        // Återställ rutorna med de nuvarande namnen som placeholders inför nästa omgång
+        const rows = document.querySelectorAll('.setup-row');
+        players.forEach((p, i) => {
+            if(rows[i]) {
+                const input = rows[i].querySelector('input[type="text"]');
+                input.placeholder = p.name;
+                input.value = "";
+            }
+        });
         
         players = [];
         isGameOver = false;
+        updateLanguageDOM();
+    }
+
+    // DRAG & DROP LOGIK FÖR SKÄRM 1
+    const sortContainer = document.getElementById('sortableInputsContainer');
+    let dragElement = null;
+
+    sortContainer.addEventListener('dragstart', (e) => {
+        dragElement = e.target.closest('.setup-row');
+        if(dragElement) {
+            dragElement.classList.add('dragging');
+        }
+    });
+
+    sortContainer.addEventListener('dragend', (e) => {
+        if(dragElement) {
+            dragElement.classList.remove('dragging');
+            dragElement = null;
+            updateSetupLabels();
+        }
+    });
+
+    sortContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(sortContainer, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (draggable) {
+            if (afterElement == null) {
+                sortContainer.appendChild(draggable);
+            } else {
+                sortContainer.insertBefore(draggable, afterElement);
+            }
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.setup-row:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: -Infinity }).element;
     }
 
     window.onload = function() {
