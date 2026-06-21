@@ -26,7 +26,7 @@
         body {
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Garanterar att appen startar i toppen */
+            align-items: flex-start;
             padding: 10px;
             box-sizing: border-box;
         }
@@ -196,15 +196,15 @@
         /* SPECIALANPASSNING FÖR LANDSCAPE (LIGGANDE) LÄGE */
         @media screen and (orientation: landscape) and (max-height: 768px) {
             body {
-                align-items: flex-start !important; /* Tvingar kroppen att hålla appen i absolut topp */
+                align-items: flex-start !important;
                 padding-top: 5px;
             }
             .container {
-                max-width: 760px; /* Breddar appen snyggt i liggande läge */
+                max-width: 760px;
                 padding: 12px;
             }
             .game-layout {
-                flex-direction: row; /* Lägger kolumnerna sida vid sida */
+                flex-direction: row;
                 gap: 20px;
             }
             .column-left {
@@ -393,7 +393,7 @@
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", end: "Spiel beenden", start: "Spiel starten",
             round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
-            rulesC: `<p>Maja wird med 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
+            rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
                      <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
@@ -407,7 +407,6 @@
         }
     };
 
-    // Stänger ner tangentbordet på surfplattan/mobilen
     function hideKeyboard() {
         for (let i = 0; i < 4; i++) {
             const inputElem = document.getElementById(`score_input_${i}`);
@@ -647,8 +646,9 @@
         if(result.isValid) {
             display.className = "live-sum valid";
             display.innerHTML = l.sumText.replace("{sum}", result.currentSum).replace("{status}", l.sumValid);
-            // KORRIGERING: Göm tangentbordet automatiskt om summan är exakt 26 och runda är klar!
             hideKeyboard();
+            // Återställ skrollpositionen ifall tangentbordet knuffade skärmen
+            window.scrollTo(0, 0);
         } else {
             display.className = "live-sum invalid";
             display.innerHTML = l.sumText.replace("{sum}", result.currentSum).replace("{status}", l.sumInvalid);
@@ -656,8 +656,10 @@
     }
 
     function saveRound() {
-        // Tvinga undan tangentbordet direkt när man klickar spara
         hideKeyboard();
+        
+        // Tvinga direkt upp vyn till toppen för att motverka iOS-tangentbordsförskjutning i landscape
+        window.scrollTo(0, 0);
 
         const result = computeCurrentScores();
         const l = texts[currentLang];
@@ -736,6 +738,9 @@
         renderTable();
         renderInputs(); 
         renderHistory();
+        
+        // Extra säkerhetskopia för att stanna kvar i topp efter DOM-renderingar
+        setTimeout(() => window.scrollTo(0, 0), 10);
     }
 
     function renderHistory() {
@@ -781,6 +786,7 @@
             renderTable();
             renderInputs();
             renderHistory();
+            window.scrollTo(0, 0);
         }
     }
 
