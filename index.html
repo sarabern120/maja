@@ -57,7 +57,6 @@
             margin-top: 12px;
             box-sizing: border-box;
         }
-        .btn-success { background: var(--success); }
         label { display: block; margin-bottom: 3px; font-weight: bold; }
         input[type="text"], input[type="number"] {
             width: 100%;
@@ -278,7 +277,7 @@
                 </div>
             </div>
         </div>
-        <button class="btn btn-success" onclick="startGame()" id="btnStart">Starta Spelet</button>
+        <button class="btn" onclick="startGame()" id="btnStart">Starta Spelet</button>
     </div>
 
     <!-- SKÄRM 2: SPELPLAN -->
@@ -309,7 +308,8 @@
                     <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
                 </div>
                 
-                <button class="btn hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
+                <!-- DEN ENDA KNAPPEN FÖR ATT STARTA NYTT SPEL UNDER MATNINGEN -->
+                <button class="btn" id="btnNewGameMain" onclick="endGame()">Starta nytt spel</button>
             </div>
             
             <!-- HÖGER KOLUMN -->
@@ -321,13 +321,11 @@
                     </thead>
                     <tbody id="historyBody"></tbody>
                 </table>
-
-                <button class="btn" onclick="endGame()" id="btnEnd">Starta nytt spel</button>
             </div>
         </div>
     </div>
 
-    <!-- REGLER (DOLD SOM STANDARD) -->
+    <!-- REGLER -->
     <div class="rules-section hidden" id="rulesBlock">
         <h3 id="rulesTitle">Regler för Maja</h3>
         <div id="rulesContent"></div>
@@ -353,10 +351,12 @@
 
     const texts = {
         sv: {
-            rulesLink: "Regler", turn: "Det är <strong>{name}</strong>s tur att börja!",
+            rulesLink: "Regler", 
+            turn: "Det är <strong>{name}</strong>s tur att börja!",
+            turnGenitiveExempt: "Det är <strong>{name}</strong> tur att börja!",
             standings: "Nuvarande Ställning", enterRes: "Mata in resultat för runda {r}",
-            save: "Spara runda", history: "Historik", end: "Starta nytt spel", start: "Starta Spelet",
-            round: "Runda", rulesT: "Regler för Maja", newGame: "Starta nytt spel",
+            save: "Spara runda", history: "Historik", newGame: "Starta nytt spel", start: "Starta Spelet",
+            round: "Runda", rulesT: "Regler för Maja",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har MINST totalpoäng -8p, och de andra två får -9p var.</p>
@@ -370,10 +370,12 @@
             ttsMaja: "Nu har {name} blivit Maja! Grattis!!!"
         },
         en: {
-            rulesLink: "Rules", turn: "It is <strong>{name}</strong>'s turn to start!",
+            rulesLink: "Rules", 
+            turn: "It is <strong>{name}</strong>'s turn to start!",
+            turnGenitiveExempt: "It is <strong>{name}</strong>' turn to start!",
             standings: "Current Standings", enterRes: "Enter results for round {r}",
-            save: "Save round", history: "History", end: "Start new game", start: "Start Game",
-            round: "Round", rulesT: "Maja Rules", newGame: "Start New Game",
+            save: "Save round", history: "History", newGame: "Start new game", start: "Start Game",
+            round: "Round", rulesT: "Maja Rules",
             rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the MINIMUM total score gets -8p, and the other two get -9p each.</p>
@@ -387,10 +389,12 @@
             ttsMaja: "Oh no! {name} became Maja! Congratulations!!!"
         },
         de: {
-            rulesLink: "Regeln", turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
+            rulesLink: "Regeln", 
+            turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
+            turnGenitiveExempt: "<strong>{name}</strong> ist an der Reihe zu beginnen!", // Tyska har egna regler, vi behåller standard
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
-            save: "Runde speichern", history: "Historie", end: "Neues Spiel starten", start: "Spiel starten",
-            round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
+            save: "Runde speichern", history: "Historie", newGame: "Neues Spiel starten", start: "Spiel starten",
+            round: "Round", rulesT: "Maja-Regeln",
             rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
@@ -405,7 +409,6 @@
         }
     };
 
-    // Funktion för att dölja/visa reglerna vid klick
     function toggleRules() {
         const rulesBlock = document.getElementById("rulesBlock");
         rulesBlock.classList.toggle("hidden");
@@ -512,11 +515,10 @@
         document.getElementById("lblStandings").innerText = l.standings;
         document.getElementById("btnSave").innerText = l.save;
         document.getElementById("lblHistory").innerText = l.history;
-        document.getElementById("btnEnd").innerText = l.end;
         document.getElementById("btnStart").innerText = l.start;
         document.getElementById("rulesTitle").innerText = l.rulesT;
         document.getElementById("rulesContent").innerHTML = l.rulesC;
-        document.getElementById("btnNewGameAfterEnd").innerText = l.newGame;
+        document.getElementById("btnNewGameMain").innerText = l.newGame;
         document.getElementById("appFooter").innerText = l.footerText;
         
         updateSetupLabels();
@@ -561,9 +563,7 @@
         document.getElementById("setupScreen").classList.add("hidden");
         document.getElementById("gameScreen").classList.remove("hidden");
         document.getElementById("inputArea").classList.remove("hidden");
-        document.getElementById("turnIndicator").classList.remove("hidden");
         document.getElementById("gameOverBanner").className = "game-over-banner hidden";
-        document.getElementById("btnNewGameAfterEnd").classList.add("hidden");
         document.getElementById("historyBody").innerHTML = "";
         
         updateLanguageDOM();
@@ -573,7 +573,14 @@
 
     function updateTurnIndicator() {
         const l = texts[currentLang];
-        document.getElementById("turnIndicator").innerHTML = l.turn.replace("{name}", players[startingPlayerIndex].name);
+        const name = players[startingPlayerIndex].name;
+        
+        // Kollar om namnet slutar på s, x eller z (både gemener och versaler)
+        const lastChar = name.trim().slice(-1).toLowerCase();
+        const endsWithS = ['s', 'x', 'z'].includes(lastChar);
+        
+        let template = endsWithS ? l.turnGenitiveExempt : l.turn;
+        document.getElementById("turnIndicator").innerHTML = template.replace("{name}", name);
     }
 
     function renderTable() {
@@ -644,6 +651,7 @@
             display.classList.add("hidden");
             return;
         } else {
+            display.刻remove = "hidden"; // Säkrar synlighet
             display.classList.remove("hidden");
         }
 
@@ -776,9 +784,7 @@
             if (isGameOver) {
                 isGameOver = false;
                 document.getElementById("inputArea").classList.remove("hidden");
-                document.getElementById("turnIndicator").classList.remove("hidden");
                 document.getElementById("gameOverBanner").className = "game-over-banner hidden";
-                document.getElementById("btnNewGameAfterEnd").classList.add("hidden");
             }
 
             document.getElementById("lblEnterResults").innerText = l.enterRes.replace("{r}", currentRound);
@@ -799,7 +805,6 @@
         banner.innerText = msg;
         banner.className = isVictory ? "game-over-banner win" : "game-over-banner lose";
         
-        document.getElementById("btnNewGameAfterEnd").classList.remove("hidden");
         renderTable();
         renderHistory();
         
@@ -810,7 +815,7 @@
         hideKeyboard();
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
-        document.getElementById("rulesBlock").classList.add("hidden"); // Döljer reglerna vid nytt spel
+        document.getElementById("rulesBlock").classList.add("hidden");
         
         const rows = document.querySelectorAll('.setup-row');
         players.forEach((p, i) => {
