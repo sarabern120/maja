@@ -56,7 +56,7 @@
             border-radius: 6px;
         }
         
-        /* REORGANISERA SPELARE (DRAG & DROP + PILAR) */
+        /* RADER FÖR INSTÄLLNINGAR (ENBART PILAR) */
         .setup-row {
             display: flex;
             align-items: center;
@@ -64,19 +64,7 @@
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 10px;
-            border: 1px dashed #ccc;
-            cursor: grab;
-            user-select: none;
-        }
-        .setup-row.dragging {
-            opacity: 0.5;
-            background: #e3f2fd;
-        }
-        .drag-handle {
-            font-size: 20px;
-            color: #888;
-            margin-right: 12px;
-            cursor: grab;
+            border: 1px solid #dee2e6;
         }
         .setup-input-wrap {
             flex-grow: 1;
@@ -84,17 +72,19 @@
         .order-arrows {
             display: flex;
             flex-direction: column;
-            margin-left: 10px;
+            margin-left: 15px;
         }
         .arrow-btn {
-            background: none;
-            border: none;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            padding: 2px 5px;
+            padding: 4px 8px;
             color: var(--primary);
+            margin: 2px 0;
         }
-        .arrow-btn:hover { opacity: 0.7; }
+        .arrow-btn:hover { background: #dee2e6; }
 
         .turn-indicator {
             background: #e3f2fd;
@@ -148,7 +138,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px; /* Låst storlek */
+            font-size: 16px;
             padding: 0 5px;
             width: 24px;
             height: 24px;
@@ -232,11 +222,10 @@
 
     <h1>Bern's Maja</h1>
 
-    <!-- SKÄRM 1: INSTÄLLNINGAR (Med sorterbara rader) -->
+    <!-- SKÄRM 1: INSTÄLLNINGAR -->
     <div id="setupScreen">
         <div id="sortableInputsContainer">
-            <div class="setup-row" draggable="true" data-index="1">
-                <div class="drag-handle">☰</div>
+            <div class="setup-row">
                 <div class="setup-input-wrap">
                     <label id="lblP1" style="font-size: 12px; margin-bottom:2px;">Spelare 1</label>
                     <input type="text" id="p1" value="" placeholder="Spelare 1">
@@ -246,8 +235,7 @@
                     <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
                 </div>
             </div>
-            <div class="setup-row" draggable="true" data-index="2">
-                <div class="drag-handle">☰</div>
+            <div class="setup-row">
                 <div class="setup-input-wrap">
                     <label id="lblP2" style="font-size: 12px; margin-bottom:2px;">Spelare 2</label>
                     <input type="text" id="p2" value="" placeholder="Spelare 2">
@@ -257,8 +245,7 @@
                     <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
                 </div>
             </div>
-            <div class="setup-row" draggable="true" data-index="3">
-                <div class="drag-handle">☰</div>
+            <div class="setup-row">
                 <div class="setup-input-wrap">
                     <label id="lblP3" style="font-size: 12px; margin-bottom:2px;">Spelare 3</label>
                     <input type="text" id="p3" value="" placeholder="Spelare 3">
@@ -268,8 +255,7 @@
                     <button class="arrow-btn" onclick="moveRow(this, 1)">▼</button>
                 </div>
             </div>
-            <div class="setup-row" draggable="true" data-index="4">
-                <div class="drag-handle">☰</div>
+            <div class="setup-row">
                 <div class="setup-input-wrap">
                     <label id="lblP4" style="font-size: 12px; margin-bottom:2px;">Spelare 4</label>
                     <input type="text" id="p4" value="" placeholder="Spelare 4">
@@ -302,7 +288,8 @@
             <h3 id="lblEnterResults" style="margin-top:20px;">Mata in resultat för runda 1</h3>
             <div id="inputsContainer"></div>
 
-            <div id="liveSumDisplay" class="live-sum">Rundans totala poängsumma: 0</div>
+            <!-- RÄTTNING 2: Dold som standard (class hidden lades till) -->
+            <div id="liveSumDisplay" class="live-sum hidden">Rundans totala poängsumma: 0</div>
             <button class="btn" onclick="saveRound()" id="btnSave">Spara runda</button>
             
             <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
@@ -341,7 +328,6 @@
     let currentLang = 'sv';
     let isGameOver = false;
 
-    // Ladda sparade värden till placeholders
     if(localStorage.getItem("maja_p1")) document.getElementById("p1").placeholder = localStorage.getItem("maja_p1");
     if(localStorage.getItem("maja_p2")) document.getElementById("p2").placeholder = localStorage.getItem("maja_p2");
     if(localStorage.getItem("maja_p3")) document.getElementById("p3").placeholder = localStorage.getItem("maja_p3");
@@ -398,7 +384,6 @@
         }
     };
 
-    // KNAPPAR: Flytta rader manuellt via pilar
     function moveRow(button, direction) {
         const row = button.closest('.setup-row');
         const container = document.getElementById('sortableInputsContainer');
@@ -410,7 +395,6 @@
         updateSetupLabels();
     }
 
-    // Funktion för att justera etiketterna (Spelare 1-4) dynamiskt efter omflyttning
     function updateSetupLabels() {
         const rows = document.querySelectorAll('.setup-row');
         const l = texts[currentLang];
@@ -458,12 +442,10 @@
             calculateLiveSum();
             renderHistory();
         }
-        // RÄTTNING 2: Kör Twemoji ENBART på språkbytesrutan så att papperskorgen lämnas orörd
         twemoji.parse(document.getElementById("langSwitchArea"));
     }
 
     function startGame() {
-        // Hämta inputfält i den ordning de ligger i DOM just nu
         const rows = document.querySelectorAll('.setup-row');
         const pNames = [];
 
@@ -473,7 +455,6 @@
             pNames.push(finalName);
         });
 
-        // Spara till localStorage (alltid i fasta nycklar för framtida placeholders)
         localStorage.setItem("maja_p1", pNames[0]);
         localStorage.setItem("maja_p2", pNames[1]);
         localStorage.setItem("maja_p3", pNames[2]);
@@ -537,17 +518,23 @@
                 </div>
             `;
         });
-        calculateLiveSum();
+        // Dölj rutan helt vid rendering av nya tomma fält
+        document.getElementById("liveSumDisplay").classList.add("hidden");
     }
 
     function computeCurrentScores() {
         let roundScores = [0, 0, 0, 0];
         let positiveSum = 0;
         let hasPlayerWithAtLeast13 = false;
+        let hasAnyInput = false; // Spårar om användaren börjat skriva något
 
         for(let i=0; i<4; i++) {
             const inputElem = document.getElementById(`score_input_${i}`);
-            if(!inputElem) return { scores: [0,0,0,0], sum: 0, isValid: true };
+            if(!inputElem) return { scores: [0,0,0,0], sum: 0, isValid: true, hasAnyInput: false };
+            
+            if(inputElem.value !== "") {
+                hasAnyInput = true; // Användaren har skrivit i minst ett fält!
+            }
             
             let val = parseInt(inputElem.value);
             if (isNaN(val)) val = 0; 
@@ -560,7 +547,7 @@
         const totalSum = roundScores.reduce((a, b) => a + b, 0);
         const isValid = (positiveSum === 26 && totalSum % 26 === 0 && hasPlayerWithAtLeast13);
 
-        return { scores: roundScores, sum: totalSum, isValid: isValid };
+        return { scores: roundScores, sum: totalSum, isValid: isValid, hasAnyInput: hasAnyInput };
     }
 
     function calculateLiveSum() {
@@ -568,6 +555,14 @@
         const result = computeCurrentScores();
         const display = document.getElementById("liveSumDisplay");
         const l = texts[currentLang];
+
+        // RÄTTNING 2: Visa bara rutan om man faktiskt har börjat skriva poäng
+        if (!result.hasAnyInput) {
+            display.classList.add("hidden");
+            return;
+        } else {
+            display.classList.remove("hidden");
+        }
 
         if(result.isValid) {
             display.className = "live-sum valid";
@@ -700,7 +695,6 @@
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
         
-        // Återställ rutorna med de nuvarande namnen som placeholders inför nästa omgång
         const rows = document.querySelectorAll('.setup-row');
         players.forEach((p, i) => {
             if(rows[i]) {
@@ -713,51 +707,6 @@
         players = [];
         isGameOver = false;
         updateLanguageDOM();
-    }
-
-    // DRAG & DROP LOGIK FÖR SKÄRM 1
-    const sortContainer = document.getElementById('sortableInputsContainer');
-    let dragElement = null;
-
-    sortContainer.addEventListener('dragstart', (e) => {
-        dragElement = e.target.closest('.setup-row');
-        if(dragElement) {
-            dragElement.classList.add('dragging');
-        }
-    });
-
-    sortContainer.addEventListener('dragend', (e) => {
-        if(dragElement) {
-            dragElement.classList.remove('dragging');
-            dragElement = null;
-            updateSetupLabels();
-        }
-    });
-
-    sortContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(sortContainer, e.clientY);
-        const draggable = document.querySelector('.dragging');
-        if (draggable) {
-            if (afterElement == null) {
-                sortContainer.appendChild(draggable);
-            } else {
-                sortContainer.insertBefore(draggable, afterElement);
-            }
-        }
-    });
-
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.setup-row:not(.dragging)')];
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
-        }, { offset: -Infinity }).element;
     }
 
     window.onload = function() {
