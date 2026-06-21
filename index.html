@@ -26,7 +26,7 @@
         body {
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: flex-start; /* Garanterar att appen startar i toppen */
             padding: 10px;
             box-sizing: border-box;
         }
@@ -190,26 +190,28 @@
             font-style: italic;
         }
 
-        /* Standard layout för spelskärmens sektioner */
+        /* Layout för spelskärmen */
         .game-layout { display: flex; flex-direction: column; }
 
-        /* SPECIALANPASSNING FÖR LANDSCAPE (LIGGANDE) LÄGE PÅ IPAD MINI OCH LIKSINANDE */
+        /* SPECIALANPASSNING FÖR LANDSCAPE (LIGGANDE) LÄGE */
         @media screen and (orientation: landscape) and (max-height: 768px) {
+            body {
+                align-items: flex-start !important; /* Tvingar kroppen att hålla appen i absolut topp */
+                padding-top: 5px;
+            }
             .container {
-                max-width: 760px; /* Gör appen bredare så allt får plats i liggande läge */
+                max-width: 760px; /* Breddar appen snyggt i liggande läge */
                 padding: 12px;
             }
             .game-layout {
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* Delar upp skärmen i två kolumner */
-                column-gap: 20px;
-                align-items: start;
+                flex-direction: row; /* Lägger kolumnerna sida vid sida */
+                gap: 20px;
             }
             .column-left {
-                grid-column: 1;
+                flex: 1;
             }
             .column-right {
-                grid-column: 2;
+                flex: 1;
             }
             h1 { font-size: 20px; margin-bottom: 5px; }
             .player-row { padding: 6px 10px; margin-bottom: 5px; }
@@ -285,7 +287,7 @@
         <div class="game-over-banner hidden" id="gameOverBanner">Spelet är slut!</div>
 
         <div class="game-layout">
-            <!-- VÄNSTER KOLUMN I LIGGANDE / TOPP I STÅENDE -->
+            <!-- VÄNSTER KOLUMN -->
             <div class="column-left">
                 <h3 id="lblStandings">Nuvarande Ställning</h3>
                 <table>
@@ -311,7 +313,7 @@
                 <button class="btn btn-success hidden" id="btnNewGameAfterEnd" onclick="endGame()">Starta nytt spel</button>
             </div>
             
-            <!-- HÖGER KOLUMN I LIGGANDE / BOTTEN I STÅENDE -->
+            <!-- HÖGER KOLUMN -->
             <div class="column-right">
                 <h3 id="lblHistory">Historik</h3>
                 <table>
@@ -359,7 +361,7 @@
             round: "Runda", rulesT: "Regler för Maja", newGame: "Starta nytt spel",
             rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
-                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tri spelare får 0 stick får den som har MINST totalpoäng -8p, och de andra två får -9p var.</p>
+                     <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har MINST totalpoäng -8p, och de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt).</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26 totalt och minst en spelare måste ha fått ≥ 13 poäng.",
@@ -391,7 +393,7 @@
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", end: "Spiel beenden", start: "Spiel starten",
             round: "Round", rulesT: "Maja-Regeln", newGame: "Neues Spiel starten",
-            rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
+            rulesC: `<p>Maja wird med 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
                      <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verliert er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
@@ -404,6 +406,14 @@
             ttsMaja: "Jetzt ist {name} die Maja geworden! Herzlichen Glückwunsch!!!"
         }
     };
+
+    // Stänger ner tangentbordet på surfplattan/mobilen
+    function hideKeyboard() {
+        for (let i = 0; i < 4; i++) {
+            const inputElem = document.getElementById(`score_input_${i}`);
+            if (inputElem) inputElem.blur();
+        }
+    }
 
     function playPopSound() {
         try {
@@ -618,7 +628,7 @@
         }
 
         const isValid = (totalSum === 26 && hasPlayerWithAtLeast13);
-        return { scores: inputScores, isValid: isValid, hasAnyInput: hasAnyInput, zeroCount: zeroCountInRound };
+        return { scores: inputScores, isValid: isValid, hasAnyInput: hasAnyInput, zeroCount: zeroCountInRound, currentSum: totalSum };
     }
 
     function calculateLiveSum() {
@@ -634,18 +644,21 @@
             display.classList.remove("hidden");
         }
 
-        let currentSum = result.scores.reduce((a, b) => a + b, 0);
-
         if(result.isValid) {
             display.className = "live-sum valid";
-            display.innerHTML = l.sumText.replace("{sum}", currentSum).replace("{status}", l.sumValid);
+            display.innerHTML = l.sumText.replace("{sum}", result.currentSum).replace("{status}", l.sumValid);
+            // KORRIGERING: Göm tangentbordet automatiskt om summan är exakt 26 och runda är klar!
+            hideKeyboard();
         } else {
             display.className = "live-sum invalid";
-            display.innerHTML = l.sumText.replace("{sum}", currentSum).replace("{status}", l.sumInvalid);
+            display.innerHTML = l.sumText.replace("{sum}", result.currentSum).replace("{status}", l.sumInvalid);
         }
     }
 
     function saveRound() {
+        // Tvinga undan tangentbordet direkt när man klickar spara
+        hideKeyboard();
+
         const result = computeCurrentScores();
         const l = texts[currentLang];
 
@@ -772,6 +785,7 @@
     }
 
     function triggerGameOver(msg, isVictory) {
+        hideKeyboard();
         isGameOver = true;
         document.getElementById("inputArea").classList.add("hidden");
         
@@ -787,6 +801,7 @@
     }
 
     function endGame() {
+        hideKeyboard();
         document.getElementById("setupScreen").classList.remove("hidden");
         document.getElementById("gameScreen").classList.add("hidden");
         
