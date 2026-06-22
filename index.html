@@ -111,6 +111,7 @@
         .game-over-banner.lose { background: #f8d7da; color: var(--danger); border: 2px solid var(--danger); }
         .game-over-banner.win { background: #d4edda; color: var(--success); border: 2px solid var(--success); }
         
+        /* UTGÅNGSPUNKT FÖR INMATNINGSRADERNA */
         .player-row {
             background: var(--light);
             padding: 10px;
@@ -120,22 +121,36 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-sizing: border-box;
         }
-        .player-name-title { font-size: 16px; margin: 0; font-weight: bold; color: var(--primary); }
+        
+        .player-name-title { 
+            font-size: 16px; 
+            margin: 0; 
+            font-weight: bold; 
+            color: var(--primary); 
+            word-break: break-word;
+            margin-right: 15px;
+            flex-grow: 1;
+        }
+        
         .score-input {
-            width: 70px;
+            width: 80px !important;
+            min-width: 80px !important;
+            max-width: 80px !important;
             font-size: 16px;
             text-align: center;
-            padding: 6px;
+            padding: 8px 6px;
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; table-layout: fixed; }
-        th, td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; overflow: hidden; text-overflow: ellipsis; }
-        th { background: #f1f3f5; }
+        th { background: #f1f3f5; font-size: 13px; word-break: break-word; white-space: normal; font-weight: bold; }
+        td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; word-break: break-word; white-space: normal; }
         
-        /* Specifik bredd för historik-papperskorgen för att förhindra overflow på Android */
-        .col-round { width: 45px; }
-        .col-trash { width: 35px; }
+        .col-round { width: 50px !important; min-width: 50px !important; max-width: 50px !important; }
+        .col-trash { width: 35px !important; min-width: 35px !important; max-width: 35px !important; }
         
         .delete-btn {
             background: none;
@@ -193,10 +208,8 @@
             font-style: italic;
         }
 
-        /* Layout för spelskärmen */
         .game-layout { display: flex; flex-direction: column; }
 
-        /* SPECIALANPASSNING FÖR LANDSCAPE (LIGGANDE) LÄGE */
         @media screen and (orientation: landscape) and (max-height: 768px) {
             body {
                 align-items: flex-start !important;
@@ -226,7 +239,6 @@
 <body>
 
 <div class="container">
-    <!-- TOPPBAR: REGLERLÄNK OCH FLAGGBUTTONS -->
     <div class="top-bar">
         <span class="rules-anchor" id="lnkRules" onclick="toggleRules()">Regler</span>
         <div class="lang-switch" id="langSwitchArea">
@@ -361,7 +373,7 @@
             standings: "Nuvarande Ställning", enterRes: "Mata in resultat för runda {r}",
             save: "Spara runda", history: "Historik", newGame: "Starta nytt spel", start: "Starta Spelet",
             round: "Runda", rulesT: "Regler för Maja",
-            rulesC: `<p>Maja spelas av 4 spelare. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
+            rulesC: `<p>Maja spelas av 4 spelare med en vanlig kortlek med 52 kort. Alla kort delas ut. Alla skickar 3 kort till vänster innan start.</p>
                      <p><strong>Poäng:</strong> Varje Hjärter = 1p. Spader Dam = 13p.</p>
                      <p><strong>Nollstick:</strong> Tar man 0 stick får man -26p. Om två gör det delas poängen (-13p var). Om tre spelare får 0 stick får den som har MINST totalpoäng -8p, och de andra två får -9p var.</p>
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt).</p>`,
@@ -380,7 +392,7 @@
             standings: "Current Standings", enterRes: "Enter results for round {r}",
             save: "Save round", history: "History", newGame: "Start new game", start: "Start Game",
             round: "Round", rulesT: "Maja Rules",
-            rulesC: `<p>Maja is played by 4 players. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
+            rulesC: `<p>Maja is played by 4 players with a standard 52-card deck. All cards are dealt. Everyone passes 3 cards to the left before starting.</p>
                      <p><strong>Scoring:</strong> Each Heart = 1p. Queen of Spades = 13p.</p>
                      <p><strong>Zero Tricks:</strong> Taking 0 tricks gives -26p. Split between two players = -13p each. If three players get 0 tricks, the one with the MINIMUM total score gets -8p, and the other two get -9p each.</p>
                      <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly.</p>`,
@@ -399,7 +411,7 @@
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", newGame: "Neues Spiel starten", start: "Spiel starten",
             round: "Round", rulesT: "Maja-Regeln",
-            rulesC: `<p>Maja wird mit 4 Spielern gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
+            rulesC: `<p>Maja wird mit 4 Spielern und einem Standardkartenspiel mit 52 Karten gespielt. Alle Karten werden ausgeteilt. Jeder gibt vor dem Start 3 Karten nach links weiter.</p>
                      <p><strong>Punkte:</strong> Jedes Herz = 1P. Pik-Dame = 13P.</p>
                      <p><strong>Null Stiche:</strong> Wer 0 Stiche macht, bekommt -26P. Wenn dies zwei Spielern gelingt, werden die Punkte geteilt (-13P jeweils). Wenn drei Spieler 0 Stiche machen, erhält derjenige mit der GERINGSTEN Gesamtpunktzahl -8P, die anderen beiden jeweils -9P.</p>
                      <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verlierer er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
@@ -634,7 +646,6 @@
             
             let val = parseInt(inputElem.value);
             
-            // Punkt 1 Rättning: Om användaren matar in ett minusvärde markeras det som felaktigt
             if (val < 0) {
                 hasNegativeInput = true;
             }
@@ -693,7 +704,6 @@
             let zeroIndices = [];
             finalRoundScores.forEach((s, idx) => { if (s === 0) zeroIndices.push(idx); });
 
-            // Ta reda på lägsta totalpoäng bland nollstickarna
             let lowestTotalScore = Infinity;
             zeroIndices.forEach(idx => {
                 if (players[idx].score < lowestTotalScore) {
@@ -701,12 +711,10 @@
                 }
             });
 
-            // Filtrera ut de nollstickare som faktiskt delar på den lägsta poängställningen
             let candidatesForMinus8 = zeroIndices.filter(idx => players[idx].score === lowestTotalScore);
 
             let selectedIdxForMinus8 = -1;
             
-            // Punkt 2 Rättning: Om det finns lika ställning inför rundan, slumpas poängen ut
             if (candidatesForMinus8.length > 1) {
                 let randomChooser = Math.floor(Math.random() * candidatesForMinus8.length);
                 selectedIdxForMinus8 = candidatesForMinus8[randomChooser];
@@ -714,7 +722,6 @@
                 selectedIdxForMinus8 = candidatesForMinus8[0];
             }
 
-            // Tilldela -8p till vinnaren av slumpen/lägsta poäng, resten får -9p
             zeroIndices.forEach(idx => {
                 if (idx === selectedIdxForMinus8) finalRoundScores[idx] = -8;
                 else finalRoundScores[idx] = -9;
@@ -781,7 +788,6 @@
             let rowHtml = `<tr><td class="col-round"><strong>R${r.roundNumber}</strong></td>`;
             r.scores.forEach(s => { rowHtml += `<td>${s > 0 ? '+' : ''}${s}</td>`; });
             
-            // Punkt 3 Rättning: Kolumnen för soptunnan har tilldelats klassen 'col-trash' för stabil layout på Android
             if (i === rounds.length - 1) {
                 rowHtml += `<td class="col-trash"><button class="delete-btn" onclick="deleteLastRound()" title="Ångra runda">🗑️</button></td>`;
             } else {
