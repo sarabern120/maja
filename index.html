@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bern's Maja</title>
-    <!-- Laddar in Twemoji för att garantera att flaggorna visas som bilder i alla webbläsare -->
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
-    <!-- Laddar in Canvas-Confetti för slutanimationen -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -250,7 +248,6 @@
 
     <h1>Bern's Maja</h1>
 
-    <!-- SKÄRM 1: INSTÄLLNINGAR -->
     <div id="setupScreen">
         <div id="sortableInputsContainer">
             <div class="setup-row">
@@ -297,12 +294,10 @@
         <button class="btn" onclick="startGame()" id="btnStart">Starta Spelet</button>
     </div>
 
-    <!-- SKÄRM 2: SPELPLAN -->
     <div id="gameScreen" class="hidden">
         <div class="game-over-banner hidden" id="gameOverBanner">Spelet är slut!</div>
 
         <div class="game-layout">
-            <!-- VÄNSTER KOLUMN -->
             <div class="column-left">
                 <h3 id="lblStandings">Nuvarande Ställning</h3>
                 <table>
@@ -314,7 +309,6 @@
                     </tbody>
                 </table>
 
-                <!-- Inmatningsformulär -->
                 <div id="inputArea">
                     <h3 id="lblEnterResults">Mata in resultat för runda {r}</h3>
                     <div id="inputsContainer"></div>
@@ -325,10 +319,9 @@
                     <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
                 </div>
                 
-                <button class="btn" id="btnNewGameMain" onclick="endGame()">Starta nytt spel</button>
+                <button class="btn" id="btnNewGameMain" onclick="confirmEndGame()">Starta nytt spel</button>
             </div>
             
-            <!-- HÖGER KOLUMN -->
             <div class="column-right">
                 <h3 id="lblHistory">Historik</h3>
                 <table>
@@ -341,7 +334,6 @@
         </div>
     </div>
 
-    <!-- REGLER -->
     <div class="rules-section hidden" id="rulesBlock">
         <h3 id="rulesTitle">Regler för Maja</h3>
         <div id="rulesContent"></div>
@@ -381,6 +373,7 @@
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26 totalt och minst en spelare måste ha fått ≥ 13 poäng.",
             validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng totalt (Hjärter + Spader Dam) fördelat på spelarna, inga minusvärden tillåtna, och minst en person måste ha fått minst 13 poäng.",
             confirmDelete: "Vill du verkligen ta bort och ångra senaste rundan?",
+            confirmReset: "Vill du verkligen starta ett helt nytt spel. Alla rundor raderas då.",
             p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4",
             footerText: "Tillägnad Göran Bern som lärde oss alla att spela Maja. ❤️",
             ttsMaja: "Nu har {name} blivit Maja! Grattis!!!"
@@ -400,6 +393,7 @@
             sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, and at least one player must have ≥ 13 points.",
             validationAlert: "Invalid score entry! Positive points must total exactly 26, no negative inputs allowed, and at least one person must have at least 13 points.",
             confirmDelete: "Are you sure you want to delete and undo the last round?",
+            confirmReset: "Are you sure you want to start a brand new game? All current rounds will be deleted.",
             p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4",
             footerText: "Dedicated to Göran Bern, who originally taught us all how to play Maja. ❤️",
             ttsMaja: "Oh no! {name} became Maja! Congratulations!!!"
@@ -419,6 +413,7 @@
             sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein und mindestens ein Spieler muss ≥ 13 Punkte haben.",
             validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein, keine negativen Werte erlaubt, und mindestens eine Person muss mindestens 13 Punkte haben.",
             confirmDelete: "Möchten Sie die letzte Runde wirklich löschen und rückgängig machen?",
+            confirmReset: "Möchten Sie wirklich ein ganz neues Spiel starten? Alle Runden werden gelöscht.",
             p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4",
             footerText: "Gewidmet Göran Bern, der uns allen das Maja-Spielen beigebracht hat. ❤️",
             ttsMaja: "Jetzt ist {name} die Maja geworden! Herzlichen Glückwunsch!!!"
@@ -510,6 +505,14 @@
             if(i === 2) label.innerText = l.p3Label;
             if(i === 3) label.innerText = l.p4Label;
         });
+    }
+
+    // Säkerhetsfråga vid klick på Starta nytt spel
+    function confirmEndGame() {
+        const l = texts[currentLang];
+        if (confirm(l.confirmReset)) {
+            endGame();
+        }
     }
 
     function setLanguage(lang) {
