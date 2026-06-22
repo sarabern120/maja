@@ -387,6 +387,7 @@
             validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng totalt (Hjärter + Spader Dam) fördelat på spelarna, inga minusvärden tillåtna, och minst en person måste ha fått minst 13 poäng.",
             confirmDelete: "Vill du verkligen ta bort och ångra senaste rundan?",
             confirmReset: "Vill du verkligen starta ett helt nytt spel. Alla rundor raderas då.",
+            nameAlert: "Vänligen ange namn för alla fyra spelare innan du startar spelet.",
             p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4",
             footerText: "Tillägnad Göran Bern som lärde oss alla att spela Maja. ❤️",
             ttsMaja: "Nu har {name} blivit Maja! Grattis!!!"
@@ -407,6 +408,7 @@
             validationAlert: "Invalid score entry! Positive points must total exactly 26, no negative inputs allowed, and at least one person must have at least 13 points.",
             confirmDelete: "Are you sure you want to delete and undo the last round?",
             confirmReset: "Are you sure you want to start a brand new game? All current rounds will be deleted.",
+            nameAlert: "Please enter names for all four players before starting the game.",
             p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4",
             footerText: "Dedicated to Göran Bern, who originally taught us all how to play Maja. ❤️",
             ttsMaja: "Oh no! {name} became Maja! Congratulations!!!"
@@ -427,6 +429,7 @@
             validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein, keine negativen Werte erlaubt, und mindestens eine Person muss mindestens 13 Punkte haben.",
             confirmDelete: "Möchten Sie die letzte Runde wirklich löschen und rückgängig machen?",
             confirmReset: "Möchten Sie wirklich ein ganz neues Spiel starten? Alle Runden werden gelöscht.",
+            nameAlert: "Bitte geben Sie die Namen aller vier Spieler ein, bevor Sie das Spiel starten.",
             p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4",
             footerText: "Gewidmet Göran Bern, der uns allen das Maja-Spielen beigebracht hat. ❤️",
             ttsMaja: "Jetzt ist {name} die Maja geworden! Herzlichen Glückwunsch!!!"
@@ -573,12 +576,20 @@
     function startGame() {
         const rows = document.querySelectorAll('.setup-row');
         const pNames = [];
+        const l = texts[currentLang];
 
-        rows.forEach((row) => {
-            const input = row.querySelector('input[type="text"]');
-            const finalName = input.value || input.placeholder || "Spelare";
+        for (let i = 0; i < rows.length; i++) {
+            const input = rows[i].querySelector('input[type="text"]');
+            // Hämta värde, fall tillbaka på placeholder, fall tillbaka på HTML:s grundvärde
+            const finalName = input.value.trim() || input.placeholder.trim() || input.getAttribute('placeholder');
+            
+            // Säkerhetskontroll: Om alla värden och placeholders helt saknas, varna användaren
+            if (!finalName) {
+                alert(l.nameAlert);
+                return;
+            }
             pNames.push(finalName);
-        });
+        }
 
         localStorage.setItem("maja_p1", pNames[0]);
         localStorage.setItem("maja_p2", pNames[1]);
@@ -682,7 +693,7 @@
             totalSum += val;
             
             // Spader Dam ger 13p. Den som har tagit Spader Dam måste alltså ha minst 13 poäng i runda.
-            // Detta villkor säkerställer dat man inte glömmer att mata in Spader Dam.
+            // Detta villkor säkerställer att man inte glömmer att mata in Spader Dam.
             if (val >= 13) hasPlayerWithAtLeast13 = true;
         }
 
@@ -814,7 +825,7 @@
                 isVictory = true;
                 targetMajaPlayer = p.name;
             }
-            // Slutvillkor 2: Förlust! En spelare har nått 52p eller mer och blir därmed utsedd till "Maja". Spelet avslutas.
+            // Slutvillkor 2: Förlust! En spelare har nått 52p eller meer och blir därmed utsedd till "Maja". Spelet avslutas.
             if(p.score >= 52) {
                 endMsg = currentLang === 'sv' ? `${p.name} har nått 52p och är MAJA (Förlorare)!` : (currentLang === 'de' ? `${p.name} hat 52P erreicht und ist MAJA (Verlierer)!` : `${p.name} reached 52p and is MAJA (Loser)!`);
                 shouldEnd = true;
