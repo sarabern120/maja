@@ -129,9 +129,13 @@
             padding: 6px;
         }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
-        th, td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; table-layout: fixed; }
+        th, td { padding: 6px; text-align: center; border-bottom: 1px solid #ddd; overflow: hidden; text-overflow: ellipsis; }
         th { background: #f1f3f5; }
+        
+        /* Specifik bredd för historik-papperskorgen för att förhindra overflow på Android */
+        .col-round { width: 45px; }
+        .col-trash { width: 35px; }
         
         .delete-btn {
             background: none;
@@ -141,6 +145,7 @@
             padding: 0;
             width: 24px;
             height: 24px;
+            display: inline-block;
         }
         
         .rules-section {
@@ -299,7 +304,7 @@
 
                 <!-- Inmatningsformulär -->
                 <div id="inputArea">
-                    <h3 id="lblEnterResults">Mata in resultat för runda 1</h3>
+                    <h3 id="lblEnterResults">Mata in resultat för runda {r}</h3>
                     <div id="inputsContainer"></div>
 
                     <div id="liveSumDisplay" class="live-sum hidden">Rundans totala poängsumma: 0</div>
@@ -308,7 +313,6 @@
                     <div class="turn-indicator" id="turnIndicator">Det är Spelare 1s tur att börja!</div>
                 </div>
                 
-                <!-- DEN ENDA KNAPPEN FÖR ATT STARTA NYTT SPEL UNDER MATNINGEN -->
                 <button class="btn" id="btnNewGameMain" onclick="endGame()">Starta nytt spel</button>
             </div>
             
@@ -317,7 +321,7 @@
                 <h3 id="lblHistory">Historik</h3>
                 <table>
                     <thead>
-                        <tr id="historyHeaders"><th>Runda</th></tr>
+                        <tr id="historyHeaders"><th class="col-round">Runda</th></tr>
                     </thead>
                     <tbody id="historyBody"></tbody>
                 </table>
@@ -363,7 +367,7 @@
                      <p><strong>Slutvillkor:</strong> Någon når 52p (förlorar som "Maja"). Någon når ≤ -100p (vinner direkt).</p>`,
             sumText: "Rundans totala poängsumma: {sum} ({status})",
             sumValid: "Giltig runda", sumInvalid: "Ogiltig! Pluspoängen måste vara exakt 26 totalt och minst en spelare måste ha fått ≥ 13 poäng.",
-            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng totalt (Hjärter + Spader Dam) fördelat på spelarna, och minst en person måste ha fått minst 13 poäng.",
+            validationAlert: "Felaktig poänginmatning! Det måste finnas exakt 26 pluspoäng totalt (Hjärter + Spader Dam) fördelat på spelarna, inga minusvärden tillåtna, och minst en person måste ha fått minst 13 poäng.",
             confirmDelete: "Vill du verkligen ta bort och ångra senaste rundan?",
             p1Label: "Spelare 1", p2Label: "Spelare 2", p3Label: "Spelare 3", p4Label: "Spelare 4",
             footerText: "Tillägnad Göran Bern som lärde oss alla att spela Maja. ❤️",
@@ -382,7 +386,7 @@
                      <p><strong>End Conditions:</strong> First to reach 52p loses ("Maja"). Reaching ≤ -100p wins instantly.</p>`,
             sumText: "Round total score sum: {sum} ({status})",
             sumValid: "Valid round", sumInvalid: "Invalid! Positive points must equal exactly 26, and at least one player must have ≥ 13 points.",
-            validationAlert: "Invalid score entry! Positive points must total exactly 26, and at least one person must have at least 13 points.",
+            validationAlert: "Invalid score entry! Positive points must total exactly 26, no negative inputs allowed, and at least one person must have at least 13 points.",
             confirmDelete: "Are you sure you want to delete and undo the last round?",
             p1Label: "Player 1", p2Label: "Player 2", p3Label: "Player 3", p4Label: "Player 4",
             footerText: "Dedicated to Göran Bern, who originally taught us all how to play Maja. ❤️",
@@ -391,7 +395,7 @@
         de: {
             rulesLink: "Regeln", 
             turn: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
-            turnGenitiveExempt: "<strong>{name}</strong> ist an der Reihe zu beginnen!", // Tyska har egna regler, vi behåller standard
+            turnGenitiveExempt: "<strong>{name}</strong> ist an der Reihe zu beginnen!",
             standings: "Aktueller Spielstand", enterRes: "Ergebnisse für Runde {r} eingeben",
             save: "Runde speichern", history: "Historie", newGame: "Neues Spiel starten", start: "Spiel starten",
             round: "Round", rulesT: "Maja-Regeln",
@@ -401,7 +405,7 @@
                      <p><strong>Endbedingungen:</strong> Sobald ein Spieler 52P erreicht, verlierer er (er ist die "Maja"). Erreicht ein Spieler ≤ -100P, gewinnt er sofort.</p>`,
             sumText: "Gesamtpunktzahl der Runde: {sum} ({status})",
             sumValid: "Gültige Runde", sumInvalid: "Ungültig! Pluspunkte müssen genau 26 sein und mindestens ein Spieler muss ≥ 13 Punkte haben.",
-            validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein und mindestens eine Person muss mindestens 13 Punkte haben.",
+            validationAlert: "Ungültige Punkteingabe! Pluspunkte müssen genau 26 sein, keine negativen Werte erlaubt, und mindestens eine Person muss mindestens 13 Punkte haben.",
             confirmDelete: "Möchten Sie die letzte Runde wirklich löschen und rückgängig machen?",
             p1Label: "Spieler 1", p2Label: "Spieler 2", p3Label: "Spieler 3", p4Label: "Spieler 4",
             footerText: "Gewidmet Göran Bern, der uns allen das Maja-Spielen beigebracht hat. ❤️",
@@ -575,7 +579,6 @@
         const l = texts[currentLang];
         const name = players[startingPlayerIndex].name;
         
-        // Kollar om namnet slutar på s, x eller z (både gemener och versaler)
         const lastChar = name.trim().slice(-1).toLowerCase();
         const endsWithS = ['s', 'x', 'z'].includes(lastChar);
         
@@ -590,14 +593,14 @@
         
         head.innerHTML = "";
         body.innerHTML = "";
-        histHead.innerHTML = `<th>${texts[currentLang].round}</th>`;
+        histHead.innerHTML = `<th class="col-round">${texts[currentLang].round}</th>`;
 
         players.forEach(p => {
             head.innerHTML += `<th>${p.name}</th>`;
             body.innerHTML += `<td style="font-size:20px; font-weight:bold; color:${p.score >= 52 ? 'var(--danger)' : (p.score <= -100 ? 'var(--success)' : 'inherit')}">${p.score}</td>`;
             histHead.innerHTML += `<th>${p.name}</th>`;
         });
-        histHead.innerHTML += `<th></th>`;
+        histHead.innerHTML += `<th class="col-trash"></th>`;
     }
 
     function renderInputs() {
@@ -621,6 +624,7 @@
         let hasPlayerWithAtLeast13 = false;
         let hasAnyInput = false;
         let zeroCountInRound = 0;
+        let hasNegativeInput = false;
 
         for(let i=0; i<4; i++) {
             const inputElem = document.getElementById(`score_input_${i}`);
@@ -629,7 +633,13 @@
             if(inputElem.value !== "") hasAnyInput = true;
             
             let val = parseInt(inputElem.value);
-            if (isNaN(val)) val = 0; 
+            
+            // Punkt 1 Rättning: Om användaren matar in ett minusvärde markeras det som felaktigt
+            if (val < 0) {
+                hasNegativeInput = true;
+            }
+            
+            if (isNaN(val) || val < 0) val = 0; 
             if (val === 0) zeroCountInRound++;
             
             inputScores[i] = val;
@@ -637,7 +647,7 @@
             if (val >= 13) hasPlayerWithAtLeast13 = true;
         }
 
-        const isValid = (totalSum === 26 && hasPlayerWithAtLeast13);
+        const isValid = (totalSum === 26 && hasPlayerWithAtLeast13 && !hasNegativeInput);
         return { scores: inputScores, isValid: isValid, hasAnyInput: hasAnyInput, zeroCount: zeroCountInRound, currentSum: totalSum };
     }
 
@@ -651,7 +661,6 @@
             display.classList.add("hidden");
             return;
         } else {
-            display.刻remove = "hidden"; // Säkrar synlighet
             display.classList.remove("hidden");
         }
 
@@ -684,18 +693,30 @@
             let zeroIndices = [];
             finalRoundScores.forEach((s, idx) => { if (s === 0) zeroIndices.push(idx); });
 
+            // Ta reda på lägsta totalpoäng bland nollstickarna
             let lowestTotalScore = Infinity;
-            let lowestPlayerIdx = -1;
-
             zeroIndices.forEach(idx => {
                 if (players[idx].score < lowestTotalScore) {
                     lowestTotalScore = players[idx].score;
-                    lowestPlayerIdx = idx;
                 }
             });
 
+            // Filtrera ut de nollstickare som faktiskt delar på den lägsta poängställningen
+            let candidatesForMinus8 = zeroIndices.filter(idx => players[idx].score === lowestTotalScore);
+
+            let selectedIdxForMinus8 = -1;
+            
+            // Punkt 2 Rättning: Om det finns lika ställning inför rundan, slumpas poängen ut
+            if (candidatesForMinus8.length > 1) {
+                let randomChooser = Math.floor(Math.random() * candidatesForMinus8.length);
+                selectedIdxForMinus8 = candidatesForMinus8[randomChooser];
+            } else {
+                selectedIdxForMinus8 = candidatesForMinus8[0];
+            }
+
+            // Tilldela -8p till vinnaren av slumpen/lägsta poäng, resten får -9p
             zeroIndices.forEach(idx => {
-                if (idx === lowestPlayerIdx) finalRoundScores[idx] = -8;
+                if (idx === selectedIdxForMinus8) finalRoundScores[idx] = -8;
                 else finalRoundScores[idx] = -9;
             });
 
@@ -757,13 +778,14 @@
 
         for (let i = rounds.length - 1; i >= 0; i--) {
             const r = rounds[i];
-            let rowHtml = `<tr><td><strong>R${r.roundNumber}</strong></td>`;
+            let rowHtml = `<tr><td class="col-round"><strong>R${r.roundNumber}</strong></td>`;
             r.scores.forEach(s => { rowHtml += `<td>${s > 0 ? '+' : ''}${s}</td>`; });
             
+            // Punkt 3 Rättning: Kolumnen för soptunnan har tilldelats klassen 'col-trash' för stabil layout på Android
             if (i === rounds.length - 1) {
-                rowHtml += `<td><button class="delete-btn" onclick="deleteLastRound()" title="Ångra runda">🗑️</button></td>`;
+                rowHtml += `<td class="col-trash"><button class="delete-btn" onclick="deleteLastRound()" title="Ångra runda">🗑️</button></td>`;
             } else {
-                rowHtml += `<td></td>`;
+                rowHtml += `<td class="col-trash"></td>`;
             }
             rowHtml += `</tr>`;
             hBody.innerHTML += rowHtml;
